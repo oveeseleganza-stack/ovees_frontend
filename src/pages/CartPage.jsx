@@ -1,8 +1,9 @@
 import React from 'react'
-import { Trash2, X, Tag, Clock } from 'lucide-react'
+import { Trash2, Tag, X } from 'lucide-react' // Added X to imports
+import { useNavigate } from 'react-router-dom'
 
-const Cart = ({ setIsCartOpen, cartItems, removeFromCart, updateQuantity }) => {
-  console.log('Cart rendering with items:', cartItems)
+const CartPage = ({ cartItems, removeFromCart, updateQuantity }) => {
+  const navigate = useNavigate()
 
   // Calculate totals
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
@@ -11,28 +12,28 @@ const Cart = ({ setIsCartOpen, cartItems, removeFromCart, updateQuantity }) => {
   const total = subtotal - discount + deliveryCharge
 
   return (
-    <div className="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center">
-      <div className="bg-white w-full max-w-5xl h-[95vh] flex flex-col overflow-hidden shadow-2xl rounded-lg">
-        {/* Header */}
-        <div className="bg-teal-600 text-white p-4 flex justify-between items-center sticky top-0 z-10">
-          <h2 className="text-xl font-bold">Shopping Cart</h2>
-          <button
-            onClick={() => setIsCartOpen(false)}
-            className="text-white hover:text-gray-200 transition"
-          >
-            <X className="w-6 h-6" />
-          </button>
-        </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-teal-600 text-white p-4 flex justify-between items-center sticky top-0 z-10 shadow-md">
+        <h2 className="text-xl font-bold">Shopping Cart</h2>
+        <button
+          onClick={() => navigate('/')}
+          className="text-white hover:text-gray-200 transition"
+        >
+          <X className="w-6 h-6" /> {/* Now properly imported */}
+        </button>
+      </header>
 
-        {/* Main Content */}
-        <div className="flex-1 overflow-y-auto p-4 flex">
+      {/* Main Content */}
+      <main className="container mx-auto px-2 sm:px-4 py-6 sm:py-12">
+        <div className="flex flex-col md:flex-row gap-6">
           {/* Product List */}
-          <div className="w-full md:w-2/3 pr-4">
+          <div className="w-full md:w-2/3">
             {cartItems.length === 0 ? (
               <div className="text-center py-20 text-gray-500">
                 <p className="text-2xl">Your cart is empty.</p>
                 <button
-                  onClick={() => setIsCartOpen(false)}
+                  onClick={() => navigate('/')}
                   className="mt-6 text-teal-600 hover:text-teal-700 font-semibold text-lg"
                 >
                   Continue Shopping
@@ -78,12 +79,6 @@ const Cart = ({ setIsCartOpen, cartItems, removeFromCart, updateQuantity }) => {
                         className="text-red-500 hover:text-red-700"
                       >
                         <Trash2 className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => alert(`Saved ${item.name} for later`)}
-                        className="text-blue-500 hover:text-blue-700 text-sm"
-                      >
-                        Save for Later
                       </button>
                     </div>
                   </div>
@@ -134,24 +129,24 @@ const Cart = ({ setIsCartOpen, cartItems, removeFromCart, updateQuantity }) => {
             </div>
           </div>
         </div>
+      </main>
 
-        {/* Sticky Footer */}
-        {cartItems.length > 0 && (
-          <div className="p-4 bg-gray-100 border-t sticky bottom-0">
-            <button
-              onClick={() => {
-                alert('Proceeding to checkout... (Feature not implemented)')
-                setIsCartOpen(false)
-              }}
-              className="w-full bg-teal-600 text-white py-3 rounded-md hover:bg-teal-700 transition font-semibold text-lg"
-            >
-              Proceed to Checkout (₹{total.toFixed(2)})
-            </button>
-          </div>
-        )}
-      </div>
+      {/* Footer */}
+      {cartItems.length > 0 && (
+        <footer className="bg-gray-100 p-4 border-t sticky bottom-0">
+          <button
+            onClick={() => {
+              alert('Proceeding to checkout... (Feature not implemented)')
+              navigate('/')
+            }}
+            className="w-full bg-teal-600 text-white py-3 rounded-md hover:bg-teal-700 transition font-semibold text-lg"
+          >
+            Proceed to Checkout (₹{total.toFixed(2)})
+          </button>
+        </footer>
+      )}
     </div>
   )
 }
 
-export default Cart
+export default CartPage

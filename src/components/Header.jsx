@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { ShoppingCart, Search, Menu, X } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { fetchCategories, searchProducts, fetchProducts } from '../services/api'
 
-const Header = ({ setIsCartOpen, cartCount, addToCart, setSelectedProduct }) => {
+const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [isSearchFocused, setIsSearchFocused] = useState(false)
@@ -12,9 +12,10 @@ const Header = ({ setIsCartOpen, cartCount, addToCart, setSelectedProduct }) => 
   const [categoryProducts, setCategoryProducts] = useState({})
   const [loadingProducts, setLoadingProducts] = useState({})
   const [hasMoreProducts, setHasMoreProducts] = useState({})
-  const [isMenuOpen, setIsMenuOpen] = useState(false) // Mobile menu toggle
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const observerRefs = useRef({})
   const navigate = useNavigate()
+  const location = useLocation()
   const ITEMS_PER_PAGE = 10
 
   // Fetch categories
@@ -147,18 +148,13 @@ const Header = ({ setIsCartOpen, cartCount, addToCart, setSelectedProduct }) => 
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-40">
-      {/* 👈 NEW: Banner at Top of Header */}
       <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-1 px-4 text-center text-xs sm:text-sm">
         Flatburg In 60 minutes!
       </div>
-
       <div className="container mx-auto px-2 sm:px-4 py-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <img src="/logo.png" alt="Logo" className="h-8 sm:h-10" />
-          <h3 className="text-xl sm:text-2xl font-bold mb-4">
-              <span className="text-teal-400">OVEES</span>{' '}
-              <span className="text-orange-400">ELEGANZA</span>
-            </h3>
+          <span className="text-lg sm:text-xl font-bold text-teal-600">Ovees</span>
         </div>
 
         {/* Search Bar */}
@@ -195,7 +191,7 @@ const Header = ({ setIsCartOpen, cartCount, addToCart, setSelectedProduct }) => 
 
         <div className="flex items-center gap-2 sm:gap-4">
           <button
-            onClick={() => setIsCartOpen(true)}
+            onClick={() => navigate('/cart')}
             className="relative p-2 rounded-full hover:bg-gray-100 transition"
           >
             <ShoppingCart className="w-6 h-6 text-gray-600" />
@@ -205,7 +201,6 @@ const Header = ({ setIsCartOpen, cartCount, addToCart, setSelectedProduct }) => 
               </span>
             )}
           </button>
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="sm:hidden p-2 rounded-full hover:bg-gray-100 transition"

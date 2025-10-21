@@ -3,15 +3,15 @@ import { useState } from 'react'
 import Home from './pages/Home'
 import SearchResults from './pages/SearchResults'
 import Header from './components/Header'
-import Cart from './components/Cart'
+import CartPage from './pages/CartPage'
 import ProductDetailModal from './components/ProductDetailModal'
 
 function App() {
-  const [isCartOpen, setIsCartOpen] = useState(false)
   const [cartItems, setCartItems] = useState([])
   const [selectedProduct, setSelectedProduct] = useState(null)
 
   const addToCart = (item, quantity = 1) => {
+    console.log('Adding to cart:', item, quantity)
     setCartItems(prev => {
       const existingItem = prev.find(cartItem => 
         (item.is_combo ? cartItem.id === `combo-${item.id}` : cartItem.id === item.id)
@@ -28,10 +28,12 @@ function App() {
   }
 
   const removeFromCart = (itemId) => {
+    console.log('Removing from cart:', itemId)
     setCartItems(prev => prev.filter(item => item.id !== itemId))
   }
 
   const updateQuantity = (itemId, newQuantity) => {
+    console.log('Updating quantity:', itemId, newQuantity)
     if (newQuantity <= 0) {
       removeFromCart(itemId)
       return
@@ -45,21 +47,12 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="font-sans relative">
+      <div className="font-sans relative min-h-screen">
         <Header 
-          setIsCartOpen={setIsCartOpen} 
           cartCount={cartItems.length}
           addToCart={addToCart}
           setSelectedProduct={setSelectedProduct}
         />
-        {isCartOpen && (
-          <Cart 
-            setIsCartOpen={setIsCartOpen}
-            cartItems={cartItems}
-            removeFromCart={removeFromCart}
-            updateQuantity={updateQuantity}
-          />
-        )}
         {selectedProduct && (
           <ProductDetailModal 
             product={selectedProduct} 
@@ -70,6 +63,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home addToCart={addToCart} />} />
           <Route path="/search" element={<SearchResults addToCart={addToCart} />} />
+          <Route path="/cart" element={<CartPage cartItems={cartItems} removeFromCart={removeFromCart} updateQuantity={updateQuantity} />} />
         </Routes>
       </div>
     </BrowserRouter>
