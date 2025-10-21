@@ -38,41 +38,48 @@ const Cart = ({ setIsCartOpen, cartItems, removeFromCart, updateQuantity }) => {
           <>
             <ul className="mb-4 space-y-3 max-h-96 overflow-y-auto">
               {cartItems.map((item) => (
-                <li key={item.id} className="flex items-center justify-between py-3 border-b">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{item.name}</p>
-                    <p className="text-xs text-gray-500">₹{item.price}</p>
-                  </div>
-                  
-                  <div className="flex items-center gap-3 ml-4">
-                    {/* Quantity Controls */}
-                    <div className="flex items-center bg-gray-100 rounded-full">
-                      <button
-                        onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                        className="w-8 h-8 flex items-center justify-center rounded-l-full hover:bg-gray-200"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                      <span className="px-4 py-2 font-semibold">{item.quantity}</span>
-                      <button
-                        onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                        disabled={item.quantity >= item.stock_quantity}
-                        className="w-8 h-8 flex items-center justify-center rounded-r-full hover:bg-gray-200 disabled:opacity-50"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
+                <li key={item.id} className="flex flex-col py-3 border-b">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{item.name}</p>
+                      {item.is_combo ? (
+                        <div className="text-xs text-gray-500 mt-1">
+                          {item.combo_products.map((p) => (
+                            <p key={p.id} className="truncate">
+                              - {p.name} (Qty: {p.quantity})
+                            </p>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-gray-500">₹{item.price}</p>
+                      )}
                     </div>
                     
-                    {/* Price */}
-                    <span className="font-semibold text-sm">₹{item.price * item.quantity}</span>
-                    
-                    {/* Remove Button */}
-                    <button
-                      onClick={() => removeFromCart(item.id)}
-                      className="text-red-500 hover:text-red-700 p-1"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-3 ml-4">
+                      <div className="flex items-center bg-gray-100 rounded-full">
+                        <button
+                          onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                          className="w-8 h-8 flex items-center justify-center rounded-l-full hover:bg-gray-200"
+                        >
+                          <Minus className="w-4 h-4" />
+                        </button>
+                        <span className="px-4 py-2 font-semibold">{item.quantity}</span>
+                        <button
+                          onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                          disabled={item.quantity >= item.stock_quantity}
+                          className="w-8 h-8 flex items-center justify-center rounded-r-full hover:bg-gray-200 disabled:opacity-50"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <span className="font-semibold text-sm">₹{item.price * item.quantity}</span>
+                      <button
+                        onClick={() => removeFromCart(item.id)}
+                        className="text-red-500 hover:text-red-700 p-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </li>
               ))}

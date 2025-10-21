@@ -1,43 +1,44 @@
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useState } from 'react'
 import Home from './pages/Home'
+import SearchResults from './pages/SearchResults'
 import Header from './components/Header'
-import Cart from './components/cart'
+import Cart from './components/Cart'
+import ProductDetailModal from './components/ProductDetailModal'
 
 function App() {
   const [isCartOpen, setIsCartOpen] = useState(false)
-  // 👇 NEW: Global Cart State
   const [cartItems, setCartItems] = useState([])
+  const [selectedProduct, setSelectedProduct] = useState(null)
 
-  // 👇 NEW: Add to Cart Function
-  const addToCart = (product, quantity = 1) => {
+  const addToCart = (item, quantity = 1) => {
     setCartItems(prev => {
-      const existingItem = prev.find(item => item.id === product.id)
+      const existingItem = prev.find(cartItem => 
+        (item.is_combo ? cartItem.id === `combo-${item.id}` : cartItem.id === item.id)
+      )
       if (existingItem) {
-        return prev.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
+        return prev.map(cartItem =>
+          (item.is_combo ? cartItem.id === `combo-${item.id}` : cartItem.id === item.id)
+            ? { ...cartItem, quantity: cartItem.quantity + quantity }
+            : cartItem
         )
       }
-      return [...prev, { ...product, quantity }]
+      return [...prev, { ...item, quantity }]
     })
   }
 
-  // 👇 NEW: Remove from Cart Function
-  const removeFromCart = (productId) => {
-    setCartItems(prev => prev.filter(item => item.id !== productId))
+  const removeFromCart = (itemId) => {
+    setCartItems(prev => prev.filter(item => item.id !== itemId))
   }
 
-  // 👇 NEW: Update Quantity Function
-  const updateQuantity = (productId, newQuantity) => {
+  const updateQuantity = (itemId, newQuantity) => {
     if (newQuantity <= 0) {
-      removeFromCart(productId)
+      removeFromCart(itemId)
       return
     }
     setCartItems(prev =>
       prev.map(item =>
-        item.id === productId ? { ...item, quantity: newQuantity } : item
+        item.id === itemId ? { ...item, quantity: newQuantity } : item
       )
     )
   }
@@ -47,18 +48,29 @@ function App() {
       <div className="font-sans relative">
         <Header 
           setIsCartOpen={setIsCartOpen} 
-          cartCount={cartItems.length} // 👈 Pass cart count
+          cartCount={cartItems.length}
+          addToCart={addToCart}
+          setSelectedProduct={setSelectedProduct}
         />
         {isCartOpen && (
           <Cart 
             setIsCartOpen={setIsCartOpen}
             cartItems={cartItems}
-            addToCart={addToCart}
             removeFromCart={removeFromCart}
             updateQuantity={updateQuantity}
           />
         )}
-      <Home addToCart={addToCart} />  
+        {selectedProduct && (
+          <ProductDetailModal 
+            product={selectedProduct} 
+            onClose={() => setSelectedProduct(null)}
+            onAddToCart={addToCart}
+          />
+        )}
+        <Routes>
+          <Route path="/" element={<Home addToCart={addToCart} />} />
+          <Route path="/search" element={<SearchResults addToCart={addToCart} />} />
+        </Routes>
       </div>
     </BrowserRouter>
   )

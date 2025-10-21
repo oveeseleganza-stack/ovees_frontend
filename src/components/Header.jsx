@@ -1,16 +1,39 @@
-import React, { useState, useEffect } from 'react'
-import { ShoppingCart, User, Search, Menu, ChevronDown, X } from 'lucide-react'
-import { fetchCategories } from '../services/api'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
+import { ShoppingCart, Search, Menu, X } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { fetchCategories, searchProducts, fetchProducts } from '../services/api'
 
-const Header = ({ setIsCartOpen, cartCount= 0 }) => {
+const Header = ({ setIsCartOpen, cartCount, addToCart, setSelectedProduct }) => {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [suggestions, setSuggestions] = useState([])
+  const [isSearchFocused, setIsSearchFocused] = useState(false)
   const [categories, setCategories] = useState([])
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState(null)
+  const [categoryProducts, setCategoryProducts] = useState({})
+  const [loadingProducts, setLoadingProducts] = useState({})
+  const [hasMoreProducts, setHasMoreProducts] = useState({})
+  const [isMenuOpen, setIsMenuOpen] = useState(false) // Mobile menu toggle
+  const observerRefs = useRef({})
+  const navigate = useNavigate()
+  const ITEMS_PER_PAGE = 10
 
+  // Fetch categories
   useEffect(() => {
     const loadCategories = async () => {
       try {
         const data = await fetchCategories()
-        setCategories(data.slice(0, 6)) // Show only first 6 categories in header
+        setCategories(data)
+        const initialProducts = {}
+        const initialLoading = {}
+        const initialHasMore = {}
+        data.forEach((cat) => {
+          initialProducts[cat.id] = []
+          initialLoading[cat.id] = false
+          initialHasMore[cat.id] = true
+        })
+        setCategoryProducts(initialProducts)
+        setLoadingProducts(initialLoading)
+        setHasMoreProducts(initialHasMore)
       } catch (err) {
         console.error('Failed to load categories:', err)
       }
@@ -18,112 +41,290 @@ const Header = ({ setIsCartOpen, cartCount= 0 }) => {
     loadCategories()
   }, [])
 
-  const handleCartClick = () => {
-    setIsCartOpen((prev) => !prev)
+  // Debounce function
+  const debounce = (func, delay) => {
+    let timeoutId
+    return (...args) => {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => func(...args), delay)
+    }
   }
 
-  return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="container mx-auto px-2 sm:px-4 py-3">
-        {/* Top Bar */}
-        <div className="flex items-center justify-between mb-3">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-teal-400 to-teal-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg sm:text-xl">O</span>
-            </div>
-            <div className="hidden sm:block">
-              <h1 className="text-xl sm:text-2xl font-bold">
-                <span className="text-teal-500">OVEES</span>{' '}
-                <span className="text-orange-500">ELEGANZA</span>
-              </h1>
-            </div>
-          </div>
+  // Fetch suggestions
+  const fetchSuggestions = useCallback(
+    debounce(async (query) => {
+      if (query.length < 2) {
+        setSuggestions([])
+        return
+      }
+      try {
+        const results = await searchProducts(query, 0, 5, true)
+        setSuggestions(results)
+      } catch (err) {
+        console.error('Error fetching suggestions:', err)
+      }
+    }, 300),
+    []
+  )
 
-          {/* Search Bar - Hidden on mobile */}
-          <div className="hidden md:flex flex-1 max-w-2xl mx-8">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+  // Update suggestions on query change
+  useEffect(() => {
+    fetchSuggestions(searchQuery)
+  }, [searchQuery, fetchSuggestions])
+
+  // Handle search submission
+  const handleSearch = (e) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`)
+      setSearchQuery('')
+      setSuggestions([])
+      setIsSearchFocused(false)
+      setIsMenuOpen(false)
+    }
+  }
+
+  // Handle suggestion click
+  const handleSuggestionClick = (product) => {
+    navigate(`/search?q=${encodeURIComponent(product.name)}`)
+    setSearchQuery('')
+    setSuggestions([])
+    setIsSearchFocused(false)
+    setIsMenuOpen(false)
+  }
+
+  // Fetch products for a category
+  const loadCategoryProducts = async (categoryId) => {
+    if (loadingProducts[categoryId] || !hasMoreProducts[categoryId]) return
+
+    setLoadingProducts((prev) => ({ ...prev, [categoryId]: true }))
+    try {
+      const skip = categoryProducts[categoryId].length
+      const data = await fetchProducts(skip, ITEMS_PER_PAGE, true, categoryId)
+      console.log(`✅ Loaded ${data.length} products for category ${categoryId}`)
+      
+      if (data.length < ITEMS_PER_PAGE) {
+        setHasMoreProducts((prev) => ({ ...prev, [categoryId]: false }))
+      }
+      
+      setCategoryProducts((prev) => ({
+        ...prev,
+        [categoryId]: [
+          ...prev[categoryId],
+          ...data.filter((newProduct) => !prev[categoryId].some((p) => p.id === newProduct.id)),
+        ],
+      }))
+    } catch (err) {
+      console.error(`Error fetching products for category ${categoryId}:`, err)
+    } finally {
+      setLoadingProducts((prev) => ({ ...prev, [categoryId]: false }))
+    }
+  }
+
+  // Intersection Observer for lazy loading products
+  useEffect(() => {
+    const observers = {}
+    categories.forEach((cat) => {
+      observers[cat.id] = new IntersectionObserver(
+        (entries) => {
+          const target = entries[0]
+          if (target.isIntersecting && hasMoreProducts[cat.id] && !loadingProducts[cat.id]) {
+            console.log(`📜 Loading more products for category ${cat.id}`)
+            loadCategoryProducts(cat.id)
+          }
+        },
+        { threshold: 0.1, rootMargin: '100px' }
+      )
+      if (observerRefs.current[cat.id]) {
+        observers[cat.id].observe(observerRefs.current[cat.id])
+      }
+    })
+
+    return () => {
+      Object.values(observers).forEach((observer) => observer.disconnect())
+    }
+  }, [categories, hasMoreProducts, loadingProducts])
+
+  return (
+    <header className="bg-white shadow-md sticky top-0 z-40">
+      {/* 👈 NEW: Banner at Top of Header */}
+      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-1 px-4 text-center text-xs sm:text-sm">
+        Flatburg In 60 minutes!
+      </div>
+
+      <div className="container mx-auto px-2 sm:px-4 py-2 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <img src="/logo.png" alt="Logo" className="h-8 sm:h-10" />
+          <h3 className="text-xl sm:text-2xl font-bold mb-4">
+              <span className="text-teal-400">OVEES</span>{' '}
+              <span className="text-orange-400">ELEGANZA</span>
+            </h3>
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative flex-1 max-w-md mx-4">
+          <form onSubmit={handleSearch}>
+            <div className="relative">
               <input
                 type="text"
-                placeholder="Search items..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-500"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+                placeholder="Search products..."
+                className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
               />
+              <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
             </div>
-          </div>
-
-          {/* Right Actions */}
-          <div className="flex items-center gap-2 sm:gap-6">
-            <button className="hidden sm:flex items-center gap-2 text-gray-700 hover:text-teal-600 transition">
-              <User className="w-5 h-5" />
-              <span className="font-medium">Login</span>
-            </button>
-           <button
-  onClick={handleCartClick}
-  className="flex items-center gap-2 text-gray-700 hover:text-teal-600 transition relative"
->
-  <ShoppingCart className="w-5 h-5" />
-  <span className="hidden sm:inline font-medium">Cart</span>
-  {cartCount > 0 && (
-    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-      {cartCount > 9 ? '9+' : cartCount}
-    </span>
-  )}
-</button>
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden text-gray-700"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Search Bar - Mobile */}
-        <div className="md:hidden mb-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search items..."
-              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-500"
-            />
-          </div>
-        </div>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-4 lg:gap-8 text-sm overflow-x-auto">
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              className="flex items-center gap-1 text-gray-700 hover:text-teal-600 transition whitespace-nowrap"
-            >
-              {cat.name} <ChevronDown className="w-4 h-4" />
-            </button>
-          ))}
-        </nav>
-
-        {/* Mobile Navigation */}
-        {mobileMenuOpen && (
-          <nav className="md:hidden mt-3 pb-3 border-t pt-3">
-            <div className="flex flex-col gap-3">
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  className="flex items-center justify-between text-gray-700 hover:text-teal-600 transition py-2"
+          </form>
+          {isSearchFocused && suggestions.length > 0 && (
+            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto z-50">
+              {suggestions.map((product) => (
+                <div
+                  key={product.id}
+                  onMouseDown={() => handleSuggestionClick(product)}
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                 >
-                  <span>{cat.name}</span>
-                  <ChevronDown className="w-4 h-4" />
-                </button>
+                  <p className="text-sm font-medium text-gray-800">{product.name}</p>
+                  <p className="text-xs text-gray-500">₹{product.price}</p>
+                </div>
               ))}
-              <button className="flex items-center gap-2 text-gray-700 hover:text-teal-600 transition py-2 border-t pt-3">
-                <User className="w-5 h-5" />
-                <span>Login</span>
-              </button>
             </div>
-          </nav>
-        )}
+          )}
+        </div>
+
+        <div className="flex items-center gap-2 sm:gap-4">
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="relative p-2 rounded-full hover:bg-gray-100 transition"
+          >
+            <ShoppingCart className="w-6 h-6 text-gray-600" />
+            {cartCount > 0 && (
+              <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
+          </button>
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="sm:hidden p-2 rounded-full hover:bg-gray-100 transition"
+          >
+            {isMenuOpen ? <X className="w-6 h-6 text-gray-600" /> : <Menu className="w-6 h-6 text-gray-600" />}
+          </button>
+        </div>
       </div>
+
+      {/* Desktop Category Dropdown */}
+      <div className="hidden sm:block bg-gray-50 border-t">
+        <div className="container mx-auto px-2 sm:px-4 py-2">
+          <div className="flex flex-wrap gap-2">
+            {categories.map((cat) => (
+              <div key={cat.id} className="relative group">
+                <button
+                  onClick={() => {
+                    setSelectedCategory(selectedCategory === cat.id ? null : cat.id)
+                    if (!categoryProducts[cat.id]?.length) loadCategoryProducts(cat.id)
+                  }}
+                  className="px-3 py-1 text-sm font-medium text-gray-700 bg-white rounded-md hover:bg-teal-100 transition"
+                >
+                  {cat.name}
+                </button>
+                {selectedCategory === cat.id && (
+                  <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-96 overflow-y-auto w-80">
+                    {categoryProducts[cat.id]?.length > 0 ? (
+                      <>
+                        <div className="p-4 space-y-2">
+                          {categoryProducts[cat.id].map((product) => (
+                            <div
+                              key={product.id}
+                              onClick={() => {
+                                setSelectedProduct(product)
+                                setSelectedCategory(null)
+                              }}
+                              className="text-sm text-gray-800 hover:bg-gray-100 cursor-pointer px-2 py-1 rounded"
+                            >
+                              {product.name}
+                            </div>
+                          ))}
+                        </div>
+                        {loadingProducts[cat.id] && (
+                          <div className="flex justify-center items-center py-4">
+                            <Loader2 className="w-6 h-6 animate-spin text-teal-500" />
+                            <span className="ml-2 text-gray-600">Loading more...</span>
+                          </div>
+                        )}
+                        <div ref={(el) => (observerRefs.current[cat.id] = el)} className="h-10" />
+                      </>
+                    ) : (
+                      <div className="p-4 text-center text-gray-500">
+                        {loadingProducts[cat.id] ? 'Loading...' : 'No products found.'}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Category Menu */}
+      {isMenuOpen && (
+        <div className="sm:hidden bg-gray-50 border-t">
+          <div className="container mx-auto px-2 py-2">
+            <div className="space-y-2">
+              {categories.map((cat) => (
+                <div key={cat.id} className="relative">
+                  <button
+                    onClick={() => {
+                      setSelectedCategory(selectedCategory === cat.id ? null : cat.id)
+                      if (!categoryProducts[cat.id]?.length) loadCategoryProducts(cat.id)
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm font-medium text-gray-700 bg-white rounded-md hover:bg-teal-100 transition"
+                  >
+                    {cat.name}
+                  </button>
+                  {selectedCategory === cat.id && (
+                    <div className="mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-80 overflow-y-auto">
+                      {categoryProducts[cat.id]?.length > 0 ? (
+                        <>
+                          <div className="p-4 space-y-2">
+                            {categoryProducts[cat.id].map((product) => (
+                              <div
+                                key={product.id}
+                                onClick={() => {
+                                  setSelectedProduct(product)
+                                  setSelectedCategory(null)
+                                  setIsMenuOpen(false)
+                                }}
+                                className="text-sm text-gray-800 hover:bg-gray-100 cursor-pointer px-2 py-1 rounded"
+                              >
+                                {product.name}
+                              </div>
+                            ))}
+                          </div>
+                          {loadingProducts[cat.id] && (
+                            <div className="flex justify-center items-center py-4">
+                              <Loader2 className="w-6 h-6 animate-spin text-teal-500" />
+                              <span className="ml-2 text-gray-600">Loading more...</span>
+                            </div>
+                          )}
+                          <div ref={(el) => (observerRefs.current[cat.id] = el)} className="h-10" />
+                        </>
+                      ) : (
+                        <div className="p-4 text-center text-gray-500">
+                          {loadingProducts[cat.id] ? 'Loading...' : 'No products found.'}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   )
 }
