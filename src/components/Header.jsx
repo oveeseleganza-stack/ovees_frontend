@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { ShoppingCart, Search, Menu, X } from 'lucide-react'
+import { ShoppingCart, Search, Menu, X, Loader2 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { fetchCategories, searchProducts, fetchProducts } from '../services/api'
 
@@ -59,8 +59,8 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
         return
       }
       try {
-        const results = await searchProducts(query, 0, 5, true)
-        setSuggestions(results)
+        const response = await searchProducts(query, 1, 5, true)
+        setSuggestions(response.items || [])
       } catch (err) {
         console.error('Error fetching suggestions:', err)
       }
@@ -100,11 +100,13 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
 
     setLoadingProducts((prev) => ({ ...prev, [categoryId]: true }))
     try {
-      const skip = categoryProducts[categoryId].length
-      const data = await fetchProducts(skip, ITEMS_PER_PAGE, true, categoryId)
-      console.log(`✅ Loaded ${data.length} products for category ${categoryId}`)
+      const currentPage = Math.floor(categoryProducts[categoryId].length / ITEMS_PER_PAGE) + 1
+      const response = await fetchProducts(currentPage, ITEMS_PER_PAGE, true, categoryId)
+      const data = response.items || []
+      const meta = response.meta || {}
+      console.log(`✅ Loaded ${data.length} products for category ${categoryId} (Page ${meta.page}/${meta.total_pages})`)
       
-      if (data.length < ITEMS_PER_PAGE) {
+      if (!meta.has_next || data.length === 0) {
         setHasMoreProducts((prev) => ({ ...prev, [categoryId]: false }))
       }
       
@@ -182,7 +184,7 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                 >
                   <p className="text-sm font-medium text-gray-800">{product.name}</p>
-                  <p className="text-xs text-gray-500">₹{product.price}</p>
+                  <p className="text-xs text-gray-500">₹{product.offer_price || product.normal_price || product.price}</p>
                 </div>
               ))}
             </div>

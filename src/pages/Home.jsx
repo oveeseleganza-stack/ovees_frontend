@@ -3,6 +3,7 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 import HeroSection from '../components/Herosession'
 import ProductCard from '../components/ProductCard'
+import ProductCardSkeleton from '../components/ProductCardSkeleton'
 import ProductDetailModal from '../components/ProductDetailModal'
 import { fetchProducts, fetchNinetynineStore, fetchOneNinetyNineStore, fetchCombos, fetchNewArrivals } from '../services/api'
 import { Loader2 } from 'lucide-react'
@@ -88,14 +89,16 @@ const Home = ({ addToCart }) => {
     setError(null)
     
     try {
-      const skip = allProducts.length
-      console.log(`🔄 Loading products: skip=${skip}, limit=${ITEMS_PER_PAGE}`)
+      const currentPage = Math.floor(allProducts.length / ITEMS_PER_PAGE) + 1
+      console.log(`🔄 Loading products: page=${currentPage}, page_size=${ITEMS_PER_PAGE}`)
       
-      const data = await fetchProducts(skip, ITEMS_PER_PAGE, true)
+      const response = await fetchProducts(currentPage, ITEMS_PER_PAGE, true)
+      const data = response.items || []
+      const meta = response.meta || {}
       
-      console.log(`✅ Loaded ${data.length} products`)
+      console.log(`✅ Loaded ${data.length} products (Page ${meta.page}/${meta.total_pages})`)
       
-      if (data.length === 0 || data.length < ITEMS_PER_PAGE) {
+      if (!meta.has_next || data.length === 0) {
         setHasMore(false)
         console.log('🏁 No more products to load')
       }
@@ -334,14 +337,12 @@ const Home = ({ addToCart }) => {
                 onAddToCart={addToCart}
               />
             ))}
+            
+            {/* Shimmer Loading Skeletons */}
+            {loading && Array.from({ length: 10 }).map((_, index) => (
+              <ProductCardSkeleton key={`skeleton-${index}`} />
+            ))}
           </div>
-
-          {loading && (
-            <div className="flex justify-center items-center py-8">
-              <Loader2 className="w-8 h-8 animate-spin text-teal-500" />
-              <span className="ml-2 text-gray-600">Loading more products...</span>
-            </div>
-          )}
 
           {!loading && (
             <div ref={observerTarget} className="h-10" />
@@ -353,9 +354,18 @@ const Home = ({ addToCart }) => {
             </div>
           )}
 
-          {!loading && allProducts.length === 0 && (
+          {!loading && allProducts.length === 0 && !error && (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg">No products found.</p>
+            </div>
+          )}
+          
+          {/* Initial Loading Skeletons */}
+          {loading && allProducts.length === 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-6">
+              {Array.from({ length: 20 }).map((_, index) => (
+                <ProductCardSkeleton key={`initial-skeleton-${index}`} />
+              ))}
             </div>
           )}
         </section>

@@ -131,10 +131,24 @@ const ProductDetailModal = ({ product, onClose,onAddToCart}) => {
             )}
 
             {/* Price */}
-            <div className="flex items-baseline gap-3">
-              <span className="text-3xl sm:text-4xl font-bold text-gray-900">
-                ₹{product.price}
-              </span>
+            <div className="flex items-baseline gap-3 flex-wrap">
+              {product.offer_price ? (
+                <>
+                  <span className="text-3xl sm:text-4xl font-bold text-gray-900">
+                    ₹{product.offer_price}
+                  </span>
+                  <span className="text-xl text-gray-500 line-through">
+                    ₹{product.normal_price}
+                  </span>
+                  <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
+                    {Math.round(((product.normal_price - product.offer_price) / product.normal_price) * 100)}% OFF
+                  </span>
+                </>
+              ) : (
+                <span className="text-3xl sm:text-4xl font-bold text-gray-900">
+                  ₹{product.normal_price || product.price}
+                </span>
+              )}
             </div>
 
             {/* Stock Info */}

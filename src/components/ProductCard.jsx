@@ -42,7 +42,17 @@ const ProductCard = ({ product, onProductClick, onAddToCart }) => {
           <p className="text-xs text-gray-500 mb-2">{product.category.name}</p>
         )}
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-xl font-bold text-gray-900">₹{product.price}</span>
+          {product.offer_price ? (
+            <>
+              <span className="text-xl font-bold text-gray-900">₹{product.offer_price}</span>
+              <span className="text-sm text-gray-500 line-through">₹{product.normal_price}</span>
+              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                {Math.round(((product.normal_price - product.offer_price) / product.normal_price) * 100)}% OFF
+              </span>
+            </>
+          ) : (
+            <span className="text-xl font-bold text-gray-900">₹{product.normal_price || product.price}</span>
+          )}
         </div>
         <button 
           onClick={handleAddClick} // ✅ FIXED: Connected!

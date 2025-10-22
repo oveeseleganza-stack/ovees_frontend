@@ -6,7 +6,10 @@ const CartPage = ({ cartItems, removeFromCart, updateQuantity }) => {
   const navigate = useNavigate()
 
   // Calculate totals
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const subtotal = cartItems.reduce((sum, item) => {
+    const price = item.offer_price || item.normal_price || item.price || 0
+    return sum + price * item.quantity
+  }, 0)
   const discount = subtotal * 0.1 // 10% discount for demo
   const deliveryCharge = subtotal > 500 ? 0 : 50 // Free delivery above ₹500
   const total = subtotal - discount + deliveryCharge
@@ -61,7 +64,16 @@ const CartPage = ({ cartItems, removeFromCart, updateQuantity }) => {
                             ))}
                           </div>
                         )}
-                        <p className="text-sm text-gray-600 mt-1">₹{item.price.toFixed(2)}</p>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {item.offer_price ? (
+                            <>
+                              <span className="font-semibold">₹{item.offer_price.toFixed(2)}</span>
+                              <span className="line-through text-gray-400 ml-2">₹{item.normal_price.toFixed(2)}</span>
+                            </>
+                          ) : (
+                            <span className="font-semibold">₹{(item.normal_price || item.price || 0).toFixed(2)}</span>
+                          )}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -114,7 +126,7 @@ const CartPage = ({ cartItems, removeFromCart, updateQuantity }) => {
                 <span>You will save ₹{discount.toFixed(2)} on this order</span>
               </div>
             </div>
-            <div className="mt-4">
+            {/* <div className="mt-4">
               <input
                 type="text"
                 placeholder="Apply Coupon"
@@ -126,7 +138,7 @@ const CartPage = ({ cartItems, removeFromCart, updateQuantity }) => {
               >
                 Apply Coupon
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
       </main>

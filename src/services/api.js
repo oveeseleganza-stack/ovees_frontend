@@ -13,16 +13,29 @@ export const fetchCategories = async () => {
   }
 }
 
-export const fetchProducts = async (skip = 0, limit = 10, isActive = true, categoryId = null) => {
+export const fetchProducts = async (page = 1, pageSize = 20, isActive = true, categoryId = null, sortBy = null, minPrice = null, maxPrice = null) => {
   try {
-    const url = categoryId
-      ? `${API_BASE_URL}${API_ENDPOINTS.PRODUCTS}?skip=${skip}&limit=${limit}&is_active=${isActive}&category_id=${categoryId}`
-      : `${API_BASE_URL}${API_ENDPOINTS.PRODUCTS}?skip=${skip}&limit=${limit}&is_active=${isActive}`
+    const params = new URLSearchParams({
+      page: page.toString(),
+      page_size: pageSize.toString(),
+      is_active: isActive.toString()
+    })
+    
+    if (categoryId) params.append('category_id', categoryId.toString())
+    if (sortBy) params.append('sort_by', sortBy)
+    if (minPrice !== null) params.append('min_price', minPrice.toString())
+    if (maxPrice !== null) params.append('max_price', maxPrice.toString())
+    
+    const url = `${API_BASE_URL}${API_ENDPOINTS.PRODUCTS}?${params.toString()}`
     const response = await fetch(url)
     if (!response.ok) {
       throw new Error('Failed to fetch products')
     }
-    return await response.json()
+    const data = await response.json()
+    return {
+      items: data.items || [],
+      meta: data.meta || {}
+    }
   } catch (error) {
     console.error('Error fetching products:', error)
     throw error
@@ -89,15 +102,30 @@ export const fetchNewArrivals = async (skip = 0, limit = 5, isActive = true) => 
   }
 }
 
-export const searchProducts = async (query, skip = 0, limit = 10, isActive = true) => {
+export const searchProducts = async (query, page = 1, pageSize = 20, isActive = true, categoryId = null, sortBy = null, minPrice = null, maxPrice = null) => {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/products/search?q=${encodeURIComponent(query)}&skip=${skip}&limit=${limit}&is_active=${isActive}`
-    )
+    const params = new URLSearchParams({
+      search: query,
+      page: page.toString(),
+      page_size: pageSize.toString(),
+      is_active: isActive.toString()
+    })
+    
+    if (categoryId) params.append('category_id', categoryId.toString())
+    if (sortBy) params.append('sort_by', sortBy)
+    if (minPrice !== null) params.append('min_price', minPrice.toString())
+    if (maxPrice !== null) params.append('max_price', maxPrice.toString())
+    
+    const url = `${API_BASE_URL}${API_ENDPOINTS.PRODUCTS}?${params.toString()}`
+    const response = await fetch(url)
     if (!response.ok) {
       throw new Error('Failed to fetch search results')
     }
-    return await response.json()
+    const data = await response.json()
+    return {
+      items: data.items || [],
+      meta: data.meta || {}
+    }
   } catch (error) {
     console.error('Error fetching search results:', error)
     throw error

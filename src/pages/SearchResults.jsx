@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { searchProducts, fetchProducts } from '../services/api'
 import ProductCard from '../components/ProductCard'
+import ProductCardSkeleton from '../components/ProductCardSkeleton'
 import ProductDetailModal from '../components/ProductDetailModal'
 import { Loader2 } from 'lucide-react'
 
@@ -24,19 +25,24 @@ const SearchResults = ({ addToCart }) => {
       setLoading(true)
       setError(null)
       try {
-        const data = await searchProducts(query, 0, 10, true)
+        const response = await searchProducts(query, 1, 20, true)
+        const data = response.items || []
         setResults(data)
         console.log(`✅ Loaded ${data.length} search results for "${query}"`)
 
         // Fetch recommendations (same category as first result or similar price)
         if (data.length > 0) {
           const firstResult = data[0]
-          const recData = await fetchProducts(0, 5, true)
+          const recResponse = await fetchProducts(1, 5, true)
+          const recData = recResponse.items || []
+          const price = firstResult.offer_price || firstResult.normal_price || firstResult.price
           const filteredRecs = recData.filter(
-            (p) =>
-              p.id !== firstResult.id &&
-              (p.category_id === firstResult.category_id ||
-                Math.abs(p.price - firstResult.price) <= 50)
+            (p) => {
+              const pPrice = p.offer_price || p.normal_price || p.price
+              return p.id !== firstResult.id &&
+                (p.category_id === firstResult.category_id ||
+                  Math.abs(pPrice - price) <= 50)
+            }
           ).slice(0, 3)
           setRecommendations(filteredRecs)
         }
@@ -69,9 +75,10 @@ const SearchResults = ({ addToCart }) => {
           )}
 
           {loading && (
-            <div className="flex justify-center items-center py-8">
-              <Loader2 className="w-8 h-8 animate-spin text-teal-500" />
-              <span className="ml-2 text-gray-600">Loading search results...</span>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-6">
+              {Array.from({ length: 20 }).map((_, index) => (
+                <ProductCardSkeleton key={`search-skeleton-${index}`} />
+              ))}
             </div>
           )}
 
