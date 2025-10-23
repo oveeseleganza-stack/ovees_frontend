@@ -1,5 +1,20 @@
 import { API_BASE_URL, API_ENDPOINTS } from '../config/api'
 
+export const fetchBanners = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/banners`)
+    if (!response.ok) {
+      throw new Error('Failed to fetch banners')
+    }
+    const data = await response.json()
+    // Filter active banners and sort by display_order
+    return data.filter(banner => banner.is_active).sort((a, b) => a.display_order - b.display_order)
+  } catch (error) {
+    console.error('Error fetching banners:', error)
+    throw error
+  }
+}
+
 export const fetchCategories = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.CATEGORIES}`)
@@ -42,60 +57,76 @@ export const fetchProducts = async (page = 1, pageSize = 20, isActive = true, ca
   }
 }
 
-export const fetchNinetynineStore = async (skip = 0, limit = 100) => {
+export const fetchNinetynineStore = async (page = 1, pageSize = 100) => {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/products/collection/99-store?skip=${skip}&limit=${limit}`
+      `${API_BASE_URL}/products/collection/99-store?page=${page}&page_size=${pageSize}`
     )
     if (!response.ok) {
       throw new Error('Failed to fetch 99 Store products')
     }
-    return await response.json()
+    const data = await response.json()
+    return {
+      items: data.items || [],
+      meta: data.meta || {}
+    }
   } catch (error) {
     console.error('Error fetching 99 Store products:', error)
     throw error
   }
 }
 
-export const fetchOneNinetyNineStore = async (skip = 0, limit = 3) => {
+export const fetchOneNinetyNineStore = async (page = 1, pageSize = 20) => {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/products/collection/199-store?skip=${skip}&limit=${limit}`
+      `${API_BASE_URL}/products/collection/199-store?page=${page}&page_size=${pageSize}`
     )
     if (!response.ok) {
       throw new Error('Failed to fetch 199 Store products')
     }
-    return await response.json()
+    const data = await response.json()
+    return {
+      items: data.items || [],
+      meta: data.meta || {}
+    }
   } catch (error) {
     console.error('Error fetching 199 Store products:', error)
     throw error
   }
 }
 
-export const fetchCombos = async (skip = 0, limit = 5, isActive = true) => {
+export const fetchCombos = async (page = 1, pageSize = 20, isActive = true) => {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/combos?skip=${skip}&limit=${limit}&is_active=${isActive}`
+      `${API_BASE_URL}/combos?page=${page}&page_size=${pageSize}&is_active=${isActive}`
     )
     if (!response.ok) {
       throw new Error('Failed to fetch combos')
     }
-    return await response.json()
+    const data = await response.json()
+    return {
+      items: data.items || [],
+      meta: data.meta || {}
+    }
   } catch (error) {
     console.error('Error fetching combos:', error)
     throw error
   }
 }
 
-export const fetchNewArrivals = async (skip = 0, limit = 5, isActive = true) => {
+export const fetchNewArrivals = async (page = 1, pageSize = 20, isActive = true) => {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/new-arrivals?skip=${skip}&limit=${limit}&is_active=${isActive}`
+      `${API_BASE_URL}/new-arrivals?page=${page}&page_size=${pageSize}&is_active=${isActive}`
     )
     if (!response.ok) {
       throw new Error('Failed to fetch new arrivals')
     }
-    return await response.json()
+    const data = await response.json()
+    return {
+      items: data.items || [],
+      meta: data.meta || {}
+    }
   } catch (error) {
     console.error('Error fetching new arrivals:', error)
     throw error

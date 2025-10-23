@@ -1,10 +1,11 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { useState } from 'react'
 import Home from './pages/Home'
 import SearchResults from './pages/SearchResults'
 import Header from './components/Header'
 import CartPage from './pages/CartPage'
 import ProductDetailModal from './components/ProductDetailModal'
+import FloatingCartButton from './components/FloatingCartButton'
 
 function App() {
   const [cartItems, setCartItems] = useState([])
@@ -17,13 +18,24 @@ function App() {
         (item.is_combo ? cartItem.id === `combo-${item.id}` : cartItem.id === item.id)
       )
       if (existingItem) {
+        const newQuantity = existingItem.quantity + quantity
+        // Remove item if quantity becomes 0 or negative
+        if (newQuantity <= 0) {
+          return prev.filter(cartItem => 
+            !(item.is_combo ? cartItem.id === `combo-${item.id}` : cartItem.id === item.id)
+          )
+        }
         return prev.map(cartItem =>
           (item.is_combo ? cartItem.id === `combo-${item.id}` : cartItem.id === item.id)
-            ? { ...cartItem, quantity: cartItem.quantity + quantity }
+            ? { ...cartItem, quantity: newQuantity }
             : cartItem
         )
       }
-      return [...prev, { ...item, quantity }]
+      // Only add if quantity is positive
+      if (quantity > 0) {
+        return [...prev, { ...item, quantity }]
+      }
+      return prev
     })
   }
 
@@ -61,10 +73,11 @@ function App() {
           />
         )}
         <Routes>
-          <Route path="/" element={<Home addToCart={addToCart} />} />
-          <Route path="/search" element={<SearchResults addToCart={addToCart} />} />
+          <Route path="/" element={<Home addToCart={addToCart} cartItems={cartItems} />} />
+          <Route path="/search" element={<SearchResults addToCart={addToCart} cartItems={cartItems} />} />
           <Route path="/cart" element={<CartPage cartItems={cartItems} removeFromCart={removeFromCart} updateQuantity={updateQuantity} />} />
         </Routes>
+        <FloatingCartButton cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)} />
       </div>
     </BrowserRouter>
   )

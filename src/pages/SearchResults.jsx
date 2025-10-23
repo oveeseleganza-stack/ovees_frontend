@@ -6,7 +6,7 @@ import ProductCardSkeleton from '../components/ProductCardSkeleton'
 import ProductDetailModal from '../components/ProductDetailModal'
 import { Loader2 } from 'lucide-react'
 
-const SearchResults = ({ addToCart }) => {
+const SearchResults = ({ addToCart, cartItems = [] }) => {
   const [results, setResults] = useState([])
   const [recommendations, setRecommendations] = useState([])
   const [loading, setLoading] = useState(false)
@@ -58,9 +58,9 @@ const SearchResults = ({ addToCart }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-2 px-4 text-center text-sm">
+      {/* <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-2 px-4 text-center text-sm">
         Flatburg In 60 minutes!
-      </div>
+      </div> */}
       <main className="container mx-auto px-2 sm:px-4 py-6 sm:py-12">
         {/* Search Results Section */}
         <section className="mb-8 sm:mb-16">
@@ -102,6 +102,7 @@ const SearchResults = ({ addToCart }) => {
                   product={product} 
                   onProductClick={() => setSelectedProduct(product)}
                   onAddToCart={addToCart}
+                  cartItems={cartItems}
                 />
               ))}
             </div>
@@ -121,6 +122,7 @@ const SearchResults = ({ addToCart }) => {
                   product={product} 
                   onProductClick={() => setSelectedProduct(product)}
                   onAddToCart={addToCart}
+                  cartItems={cartItems}
                 />
               ))}
             </div>

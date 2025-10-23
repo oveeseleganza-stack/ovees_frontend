@@ -8,7 +8,7 @@ import ProductDetailModal from '../components/ProductDetailModal'
 import { fetchProducts, fetchNinetynineStore, fetchOneNinetyNineStore, fetchCombos, fetchNewArrivals } from '../services/api'
 import { Loader2 } from 'lucide-react'
 
-const Home = ({ addToCart }) => {
+const Home = ({ addToCart, cartItems = [] }) => {
   const [allProducts, setAllProducts] = useState([])
   const [ninetynineProducts, setNinetynineProducts] = useState([])
   const [oneNinetyNineProducts, setOneNinetyNineProducts] = useState([])
@@ -25,7 +25,8 @@ const Home = ({ addToCart }) => {
   useEffect(() => {
     const loadNinetynineStore = async () => {
       try {
-        const data = await fetchNinetynineStore(0, 100)
+        const response = await fetchNinetynineStore(1, 100)
+        const data = response.items || []
         setNinetynineProducts(data)
         console.log(`✅ Loaded ${data.length} products from 99 Store`)
       } catch (err) {
@@ -40,7 +41,8 @@ const Home = ({ addToCart }) => {
   useEffect(() => {
     const loadOneNinetyNineStore = async () => {
       try {
-        const data = await fetchOneNinetyNineStore(0, 3)
+        const response = await fetchOneNinetyNineStore(1, 20)
+        const data = response.items || []
         setOneNinetyNineProducts(data)
         console.log(`✅ Loaded ${data.length} products from 199 Store`)
       } catch (err) {
@@ -55,7 +57,8 @@ const Home = ({ addToCart }) => {
   useEffect(() => {
     const loadCombos = async () => {
       try {
-        const data = await fetchCombos(0, 5, true)
+        const response = await fetchCombos(1, 20, true)
+        const data = response.items || []
         setCombos(data)
         console.log(`✅ Loaded ${data.length} combos`)
       } catch (err) {
@@ -70,7 +73,8 @@ const Home = ({ addToCart }) => {
   useEffect(() => {
     const loadNewArrivals = async () => {
       try {
-        const data = await fetchNewArrivals(0, 5, true)
+        const response = await fetchNewArrivals(1, 20, true)
+        const data = response.items || []
         setNewArrivals(data)
         console.log(`✅ Loaded ${data.length} new arrivals`)
       } catch (err) {
@@ -196,6 +200,7 @@ const Home = ({ addToCart }) => {
                   product={item.product}
                   onProductClick={() => setSelectedProduct(item.product)}
                   onAddToCart={addToCart}
+                  cartItems={cartItems}
                 />
               ))}
             </div>
@@ -224,6 +229,7 @@ const Home = ({ addToCart }) => {
                   product={product} 
                   onProductClick={() => setSelectedProduct(product)}
                   onAddToCart={addToCart}
+                  cartItems={cartItems}
                 />
               ))}
             </div>
@@ -252,6 +258,7 @@ const Home = ({ addToCart }) => {
                   product={product} 
                   onProductClick={() => setSelectedProduct(product)}
                   onAddToCart={addToCart}
+                  cartItems={cartItems}
                 />
               ))}
             </div>
@@ -335,6 +342,7 @@ const Home = ({ addToCart }) => {
                 product={product} 
                 onProductClick={() => setSelectedProduct(product)}
                 onAddToCart={addToCart}
+                cartItems={cartItems}
               />
             ))}
             
