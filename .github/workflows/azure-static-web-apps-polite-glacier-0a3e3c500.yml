@@ -23,44 +23,27 @@ jobs:
           submodules: true
           lfs: false
 
-      # 🟢 Setup Node.js 20 (to fix Vite + React Router build error)
+      # Setup Node.js 20 for the build
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # 🧩 Install dependencies and build manually
       - name: Install dependencies
         run: npm ci
 
       - name: Build app
         run: npm run build
 
-      # 🪣 Continue with Azure Static Web Apps deploy
-      - name: Install OIDC Client from Core Package
-        run: npm install @actions/core@1.6.0 @actions/http-client
-
-      - name: Get Id Token
-        uses: actions/github-script@v6
-        id: idtoken
-        with:
-          script: |
-            const coredemo = require('@actions/core')
-            return await coredemo.getIDToken()
-          result-encoding: string
-
-      - name: Build And Deploy
+      # Deploy to Azure Static Web Apps (skip Oryx build)
+      - name: Deploy to Azure
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_POLITE_GLACIER_0A3E3C500 }}
           action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          app_location: "/"           # App source code path
-          api_location: ""            # API source code path - optional
-          output_location: "build"    # Built app content directory
-          github_id_token: ${{ steps.idtoken.outputs.result }}
-          ###### End of Repository/Build Configurations ######
+          app_location: "dist"        # ✅ Use Vite’s output folder
+          skip_app_build: true        # ✅ Don’t rebuild inside Oryx
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
