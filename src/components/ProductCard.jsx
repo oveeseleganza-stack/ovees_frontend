@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Heart, Minus, Plus } from 'lucide-react'
+import { Minus, Plus } from 'lucide-react'
 
 const ProductCard = ({ product, onProductClick, onAddToCart, cartItems = [] }) => {
   const [isClicked, setIsClicked] = useState(false)
@@ -52,9 +52,6 @@ const ProductCard = ({ product, onProductClick, onAddToCart, cartItems = [] }) =
             Out of Stock
           </span>
         )}
-        <button className="absolute top-2 right-2 bg-white p-2 rounded-full hover:bg-red-50 transition">
-          <Heart className="w-5 h-5 text-gray-600 hover:text-red-500" />
-        </button>
       </div>
       <div className="p-4">
         <h3 

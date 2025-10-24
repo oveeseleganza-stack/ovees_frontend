@@ -13,7 +13,9 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
   const [loadingProducts, setLoadingProducts] = useState({})
   const [hasMoreProducts, setHasMoreProducts] = useState({})
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true)
   const observerRefs = useRef({})
+  const lastScrollY = useRef(0)
   const navigate = useNavigate()
   const location = useLocation()
   const ITEMS_PER_PAGE = 10
@@ -40,6 +42,26 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
       }
     }
     loadCategories()
+  }, [])
+
+  // Handle scroll to hide/show header
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      
+      if (currentScrollY > lastScrollY.current) {
+        // Scrolling down - hide header
+        setIsHeaderVisible(false)
+      } else {
+        // Scrolling up - show header
+        setIsHeaderVisible(true)
+      }
+      
+      lastScrollY.current = currentScrollY
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   // Debounce function
@@ -105,11 +127,11 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
       const data = response.items || []
       const meta = response.meta || {}
       console.log(`✅ Loaded ${data.length} products for category ${categoryId} (Page ${meta.page}/${meta.total_pages})`)
-      
+
       if (!meta.has_next || data.length === 0) {
         setHasMoreProducts((prev) => ({ ...prev, [categoryId]: false }))
       }
-      
+
       setCategoryProducts((prev) => ({
         ...prev,
         [categoryId]: [
@@ -122,6 +144,12 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
     } finally {
       setLoadingProducts((prev) => ({ ...prev, [categoryId]: false }))
     }
+  }
+
+  // Handle category click
+  const handleCategoryClick = (category) => {
+    navigate(`/category?id=${category.id}&name=${encodeURIComponent(category.name)}`)
+    setIsMenuOpen(false)
   }
 
   // Intersection Observer for lazy loading products
@@ -148,18 +176,33 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
     }
   }, [categories, hasMoreProducts, loadingProducts])
 
+  // Get category icon/image - you can customize this based on your category names
+  const getCategoryIcon = (categoryName) => {
+    // Return a default icon or you can map specific icons to categories
+    return '🏷️'
+  }
+
   return (
-    <header className="bg-white shadow-md sticky top-0 z-40">
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-1 px-4 text-center text-xs sm:text-sm">
-        Flatburg In 60 minutes!
+    <header className={`bg-gray-700 shadow-md sticky top-0 z-40 transform transition-transform duration-300 ease-in-out ${
+      isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+    }`}>
+      <div className="bg-yellow-400 text-gray-800 py-2 px-4 text-center text-xs sm:text-sm font-semibold">
+        <div className="flex items-center justify-center gap-4 flex-wrap">
+          <span>🚚 Home Delivery </span>
+          <span>|</span>
+          <span>📍 Track your order</span>
+          <span>|</span>
+          <span>🛍️ All Offers</span>
+        </div>
       </div>
+
       <div className="container mx-auto px-2 sm:px-4 py-2 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <img src="/logo.png" alt="Logo" className="h-8 sm:h-10" />
-         <h1 className="text-xl sm:text-2xl font-bold mb-4">
-              <span className="text-teal-400">OVEES</span>{' '}
-              <span className="text-orange-400">ELEGANZA</span>
-            </h1>
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+          <img src="/logoo.png" alt="Logo" className="h-10 sm:h-12" />
+          <h1 className="text-xl sm:text-2xl font-bold">
+            <span className="text-teal-400">OVEES</span>{' '}
+            <span className="text-orange-400">ELEGANZA</span>
+          </h1>
         </div>
 
         {/* Search Bar */}
@@ -172,14 +215,14 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-                placeholder="Search products..."
-                className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                placeholder="Search items..."
+                className="w-full pl-10 pr-4 py-2 rounded-full bg-white border border-white focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm"
               />
               <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
             </div>
           </form>
           {isSearchFocused && suggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto z-50">
+            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto z-50 mt-1">
               {suggestions.map((product) => (
                 <div
                   key={product.id}
@@ -197,9 +240,10 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
         <div className="flex items-center gap-2 sm:gap-4">
           <button
             onClick={() => navigate('/cart')}
-            className="relative p-2 rounded-full hover:bg-gray-100 transition"
+            className="relative flex items-center gap-2 px-3 py-2 rounded-full hover:bg-gray-700 transition"
           >
-            <ShoppingCart className="w-6 h-6 text-gray-600" />
+            <ShoppingCart className="w-6 h-6 text-white" />
+            <span className="text-white text-sm font-medium hidden sm:inline">Cart</span>
             {cartCount > 0 && (
               <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                 {cartCount}
@@ -208,123 +252,73 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
           </button>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="sm:hidden p-2 rounded-full hover:bg-gray-100 transition"
+            className="sm:hidden p-2 rounded-full hover:bg-gray-700 transition"
           >
-            {isMenuOpen ? <X className="w-6 h-6 text-gray-600" /> : <Menu className="w-6 h-6 text-gray-600" />}
+            {isMenuOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
           </button>
         </div>
       </div>
 
-      {/* Desktop Category Dropdown */}
-      <div className="hidden sm:block bg-gray-50 border-t">
-        <div className="container mx-auto px-2 sm:px-4 py-2">
-          <div className="flex flex-wrap gap-2">
+      {/* Desktop Category Bar - Flipkart Style */}
+      <div className="hidden sm:block bg-white border-t border-gray-200 shadow-sm">
+        <div className="container mx-auto px-2 sm:px-4">
+          <div className="flex items-center justify-between overflow-x-auto scrollbar-hide py-2">
             {categories.map((cat) => (
-              <div key={cat.id} className="relative group">
-                <button
-                  onClick={() => {
-                    setSelectedCategory(selectedCategory === cat.id ? null : cat.id)
-                    if (!categoryProducts[cat.id]?.length) loadCategoryProducts(cat.id)
-                  }}
-                  className="px-3 py-1 text-sm font-medium text-gray-700 bg-white rounded-md hover:bg-teal-100 transition"
-                >
+              <div
+                key={cat.id}
+                onClick={() => handleCategoryClick(cat)}
+                className="flex flex-col items-center justify-center min-w-[80px] px-3 py-2 cursor-pointer group hover:bg-gray-50 rounded-lg transition-all"
+              >
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <span className="text-2xl">{getCategoryIcon(cat.name)}</span>
+                </div>
+                <span className="text-xs font-medium text-gray-700 text-center line-clamp-2 group-hover:text-teal-600">
                   {cat.name}
-                </button>
-                {selectedCategory === cat.id && (
-                  <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-96 overflow-y-auto w-80">
-                    {categoryProducts[cat.id]?.length > 0 ? (
-                      <>
-                        <div className="p-4 space-y-2">
-                          {categoryProducts[cat.id].map((product) => (
-                            <div
-                              key={product.id}
-                              onClick={() => {
-                                setSelectedProduct(product)
-                                setSelectedCategory(null)
-                              }}
-                              className="text-sm text-gray-800 hover:bg-gray-100 cursor-pointer px-2 py-1 rounded"
-                            >
-                              {product.name}
-                            </div>
-                          ))}
-                        </div>
-                        {loadingProducts[cat.id] && (
-                          <div className="flex justify-center items-center py-4">
-                            <Loader2 className="w-6 h-6 animate-spin text-teal-500" />
-                            <span className="ml-2 text-gray-600">Loading more...</span>
-                          </div>
-                        )}
-                        <div ref={(el) => (observerRefs.current[cat.id] = el)} className="h-10" />
-                      </>
-                    ) : (
-                      <div className="p-4 text-center text-gray-500">
-                        {loadingProducts[cat.id] ? 'Loading...' : 'No products found.'}
-                      </div>
-                    )}
-                  </div>
-                )}
+                </span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Mobile Category Menu */}
+
+      {/* Mobile Sidebar Menu - Slides from Left */}
       {isMenuOpen && (
-        <div className="sm:hidden bg-gray-50 border-t">
-          <div className="container mx-auto px-2 py-2">
-            <div className="space-y-2">
+        <>
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-30 sm:hidden"
+            onClick={() => setIsMenuOpen(false)}
+          />
+          {/* Sidebar */}
+          <div className="fixed left-0 top-0 h-full w-64 bg-white shadow-2xl z-40 sm:hidden transform transition-transform duration-300 ease-in-out overflow-y-auto">
+            {/* Close Button */}
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-lg font-bold text-gray-800">Categories</h2>
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                className="p-1 hover:bg-gray-100 rounded-full transition"
+              >
+                <X className="w-6 h-6 text-gray-600" />
+              </button>
+            </div>
+            {/* Categories List */}
+            <div className="p-4 space-y-2">
               {categories.map((cat) => (
-                <div key={cat.id} className="relative">
-                  <button
-                    onClick={() => {
-                      setSelectedCategory(selectedCategory === cat.id ? null : cat.id)
-                      if (!categoryProducts[cat.id]?.length) loadCategoryProducts(cat.id)
-                    }}
-                    className="w-full text-left px-3 py-2 text-sm font-medium text-gray-700 bg-white rounded-md hover:bg-teal-100 transition"
-                  >
-                    {cat.name}
-                  </button>
-                  {selectedCategory === cat.id && (
-                    <div className="mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-80 overflow-y-auto">
-                      {categoryProducts[cat.id]?.length > 0 ? (
-                        <>
-                          <div className="p-4 space-y-2">
-                            {categoryProducts[cat.id].map((product) => (
-                              <div
-                                key={product.id}
-                                onClick={() => {
-                                  setSelectedProduct(product)
-                                  setSelectedCategory(null)
-                                  setIsMenuOpen(false)
-                                }}
-                                className="text-sm text-gray-800 hover:bg-gray-100 cursor-pointer px-2 py-1 rounded"
-                              >
-                                {product.name}
-                              </div>
-                            ))}
-                          </div>
-                          {loadingProducts[cat.id] && (
-                            <div className="flex justify-center items-center py-4">
-                              <Loader2 className="w-6 h-6 animate-spin text-teal-500" />
-                              <span className="ml-2 text-gray-600">Loading more...</span>
-                            </div>
-                          )}
-                          <div ref={(el) => (observerRefs.current[cat.id] = el)} className="h-10" />
-                        </>
-                      ) : (
-                        <div className="p-4 text-center text-gray-500">
-                          {loadingProducts[cat.id] ? 'Loading...' : 'No products found.'}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+                <button
+                  key={cat.id}
+                  onClick={() => handleCategoryClick(cat)}
+                  className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-teal-100 hover:text-teal-700 transition flex items-center gap-3"
+                >
+                  <span className="text-xl">{getCategoryIcon(cat.name)}</span>
+                  <span>{cat.name}</span>
+                </button>
               ))}
             </div>
           </div>
-        </div>
+        </>
       )}
+
     </header>
   )
 }

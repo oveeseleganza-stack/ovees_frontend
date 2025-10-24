@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { X, ChevronLeft, ChevronRight, Heart, ShoppingCart, Minus, Plus } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, ShoppingCart, Minus, Plus } from 'lucide-react'
 
 const ProductDetailModal = ({ product, onClose,onAddToCart}) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
@@ -206,17 +206,13 @@ const ProductDetailModal = ({ product, onClose,onAddToCart}) => {
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
            <button
-  onClick={() => onAddToCart(product, quantity)} // 👈 ADD THIS
+  onClick={() => onAddToCart(product, quantity)}
   disabled={product.stock_quantity === 0 || quantity === 0}
   className="flex-1 bg-emerald-500 text-white py-3 px-6 rounded-lg hover:bg-emerald-600 transition font-semibold flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
 >
   <ShoppingCart className="w-5 h-5" />
   {product.stock_quantity > 0 ? `Add to Cart (${quantity})` : 'Out of Stock'}
 </button>
-              <button className="bg-white border-2 border-gray-300 text-gray-700 py-3 px-6 rounded-lg hover:border-red-500 hover:text-red-500 transition font-semibold flex items-center justify-center gap-2">
-                <Heart className="w-5 h-5" />
-                Wishlist
-              </button>
             </div>
 
             {/* Additional Info */}
