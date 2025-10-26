@@ -221,14 +221,14 @@ const ProductDetailModal = ({ product, onClose,onAddToCart}) => {
                 <span className="text-gray-600">✓</span>
                 <span className="text-gray-700">Free delivery on orders above ₹500</span>
               </div>
-              <div className="flex items-center gap-2">
+              {/* <div className="flex items-center gap-2">
                 <span className="text-gray-600">✓</span>
                 <span className="text-gray-700">Easy returns within 7 days</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-gray-600">✓</span>
                 <span className="text-gray-700">100% authentic products</span>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

@@ -47,7 +47,7 @@ const CombosPage = ({ addToCart, cartItems = [] }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header cartCount={cartItems.length} addToCart={addToCart} />
+      {/* <Header cartCount={cartItems.length} addToCart={addToCart} /> */}
       
       <main className="container mx-auto px-2 sm:px-4 py-6 sm:py-12">
         <div className="flex items-center justify-between mb-6">
