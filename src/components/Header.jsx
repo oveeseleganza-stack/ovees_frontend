@@ -176,11 +176,6 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
     }
   }, [categories, hasMoreProducts, loadingProducts])
 
-  // // Get category icon/image - you can customize this based on your category names
-  // const getCategoryIcon = (categoryName) => {
-  //   // Return a default icon or you can map specific icons to categories
-  //   return '🏷️'
-  // }
 
   return (
     <header className={`bg-gray-700 shadow-md sticky top-0 z-40 transform transition-transform duration-300 ease-in-out ${
@@ -269,9 +264,16 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
                 onClick={() => handleCategoryClick(cat)}
                 className="flex flex-col items-center justify-center min-w-[80px] px-3 py-2 cursor-pointer group hover:bg-gray-50 rounded-lg transition-all"
               >
-                {/* <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                  <span className="text-2xl">{getCategoryIcon(cat.name)}</span>
-                </div> */}
+                {cat.icon_url && (
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform overflow-hidden">
+                    <img 
+                      src={cat.icon_url} 
+                      alt={cat.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                )}
                 <span className="text-xs font-medium text-gray-700 text-center line-clamp-2 group-hover:text-teal-600">
                   {cat.name}
                 </span>
@@ -310,7 +312,14 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
                   onClick={() => handleCategoryClick(cat)}
                   className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-teal-100 hover:text-teal-700 transition flex items-center gap-3"
                 >
-                  <span className="text-xl">{getCategoryIcon(cat.name)}</span>
+                  {cat.icon_url && (
+                    <img 
+                      src={cat.icon_url} 
+                      alt={cat.name}
+                      className="w-6 h-6 object-cover rounded"
+                      loading="lazy"
+                    />
+                  )}
                   <span>{cat.name}</span>
                 </button>
               ))}

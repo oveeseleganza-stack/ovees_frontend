@@ -1,7 +1,9 @@
 import React from 'react'
 import { ChevronRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const BannerCards = ({ onCardClick }) => {
+  const navigate = useNavigate()
   const cards = [
     {
       id: 'new-arrivals',
@@ -45,12 +47,22 @@ const BannerCards = ({ onCardClick }) => {
     }
   ]
 
+  const handleCardClick = (cardId) => {
+    const routes = {
+      'new-arrivals': '/new-arrivals',
+      '99-store': '/99-store',
+      '199-store': '/199-store',
+      'combos': '/combos'
+    }
+    navigate(routes[cardId])
+  }
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
       {cards.map((card) => (
         <div
           key={card.id}
-          onClick={() => onCardClick(card.id)}
+          onClick={() => handleCardClick(card.id)}
           className="relative h-48 rounded-xl overflow-hidden cursor-pointer transform transition-all duration-300 hover:shadow-lg hover:-translate-y-2 hover:scale-105 group"
         >
           {/* Background Image */}

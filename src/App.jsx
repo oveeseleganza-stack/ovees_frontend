@@ -5,6 +5,10 @@ import SearchResults from './pages/SearchResults'
 import CategoryProducts from './pages/CategoryProducts'
 import Header from './components/Header'
 import CartPage from './pages/CartPage'
+import NewArrivalsPage from './pages/NewArrivalsPage'
+import NinetynineStorePage from './pages/NinetynineStorePage'
+import OneNinetynineStorePage from './pages/OneNinetynineStorePage'
+import CombosPage from './pages/CombosPage'
 import ProductDetailModal from './components/ProductDetailModal'
 import FloatingCartButton from './components/FloatingCartButton'
 import { saveCartToCookie, getCartFromCookie } from './utils/cartStorage'
@@ -87,6 +91,10 @@ function App() {
           <Route path="/search" element={<SearchResults addToCart={addToCart} cartItems={cartItems} />} />
           <Route path="/category" element={<CategoryProducts addToCart={addToCart} cartItems={cartItems} />} />
           <Route path="/cart" element={<CartPage cartItems={cartItems} removeFromCart={removeFromCart} updateQuantity={updateQuantity} />} />
+          <Route path="/new-arrivals" element={<NewArrivalsPage addToCart={addToCart} cartItems={cartItems} />} />
+          <Route path="/99-store" element={<NinetynineStorePage addToCart={addToCart} cartItems={cartItems} />} />
+          <Route path="/199-store" element={<OneNinetynineStorePage addToCart={addToCart} cartItems={cartItems} />} />
+          <Route path="/combos" element={<CombosPage addToCart={addToCart} cartItems={cartItems} />} />
         </Routes>
         <FloatingCartButton cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)} />
       </div>
