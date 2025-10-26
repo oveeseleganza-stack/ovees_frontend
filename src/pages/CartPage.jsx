@@ -14,6 +14,42 @@ const CartPage = ({ cartItems, removeFromCart, updateQuantity }) => {
   const deliveryCharge = subtotal > 500 ? 0 : 50 // Free delivery above ₹500
   const total = subtotal - discount + deliveryCharge
 
+  // Handle WhatsApp checkout
+  const handleWhatsAppCheckout = () => {
+    // Build message with cart details
+    let message = `*Order Details*\n\n`
+    
+    // Add items
+    message += `*Items:*\n`
+    cartItems.forEach((item) => {
+      const price = item.offer_price || item.normal_price || item.price || 0
+      message += `• ${item.name}\n`
+      message += `  Qty: ${item.quantity} × ₹${price.toFixed(2)} = ₹${(price * item.quantity).toFixed(2)}\n`
+      if (item.is_combo && item.combo_products) {
+        item.combo_products.forEach((p) => {
+          message += `  └─ ${p.name} (x${p.quantity})\n`
+        })
+      }
+    })
+    
+    // Add pricing details
+    message += `\n*Price Summary:*\n`
+    message += `Subtotal: ₹${subtotal.toFixed(2)}\n`
+    message += `Discount (10%): -₹${discount.toFixed(2)}\n`
+    message += `Delivery Charge: ${deliveryCharge === 0 ? 'Free' : `₹${deliveryCharge.toFixed(2)}`}\n`
+    message += `*Total: ₹${total.toFixed(2)}*\n\n`
+    message += `Please confirm this order. Thank you!`
+
+    // Encode message for URL
+    const encodedMessage = encodeURIComponent(message)
+    
+    // WhatsApp API URL (8129690147 is the phone number)
+    const whatsappUrl = `https://wa.me/918129690147?text=${encodedMessage}`
+    
+    // Open WhatsApp
+    window.open(whatsappUrl, '_blank')
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -100,7 +136,7 @@ const CartPage = ({ cartItems, removeFromCart, updateQuantity }) => {
           </div>
 
           {/* Price Summary */}
-          <div className="w-full md:w-1/3 bg-gray-50 p-4 rounded-lg shadow-inner">
+          <div className="w-full md:w-1/3 bg-gray-50 p-4 rounded-lg shadow-inner h-fit sticky top-20">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Price Details</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
@@ -115,7 +151,7 @@ const CartPage = ({ cartItems, removeFromCart, updateQuantity }) => {
                 <span>Delivery Charge</span>
                 <span>{deliveryCharge === 0 ? 'Free' : `₹${deliveryCharge.toFixed(2)}`}</span>
               </div>
-              <div className="flex justify-between font-bold text-lg mt-4">
+              <div className="flex justify-between font-bold text-lg mt-4 border-t pt-4">
                 <span>Total Amount</span>
                 <span>₹{total.toFixed(2)}</span>
               </div>
@@ -126,37 +162,20 @@ const CartPage = ({ cartItems, removeFromCart, updateQuantity }) => {
                 <span>You will save ₹{discount.toFixed(2)} on this order</span>
               </div>
             </div>
-            {/* <div className="mt-4">
-              <input
-                type="text"
-                placeholder="Apply Coupon"
-                className="w-full p-2 border border-gray-300 rounded mb-2"
-              />
+            {cartItems.length > 0 && (
               <button
-                onClick={() => alert('Coupon applied! (Feature not implemented)')}
-                className="w-full bg-teal-600 text-white py-2 rounded hover:bg-teal-700 transition"
+                onClick={handleWhatsAppCheckout}
+                className="w-full bg-teal-600 text-white py-2 rounded-md hover:bg-teal-700 transition font-semibold mt-6 flex items-center justify-center gap-2"
               >
-                Apply Coupon
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-4.946 1.347l-.355.192-.368-.06a9.879 9.879 0 00-3.464.608l.564 2.173 1.888-.959a9.9 9.9 0 013.285-1.855c3.486-1.02 7.313-.542 10.159 1.34 2.846 1.882 4.481 5.009 4.481 8.296 0 .55-.047 1.1-.138 1.649l.738 1.321-2.365-.666a9.88 9.88 0 01-2.202 1.518l-.422.18-.434-.079c-1.122.308-2.298.466-3.513.466-5.335 0-9.678-4.343-9.678-9.678 0-1.747.38-3.408 1.127-4.99l.199-.424-.423-.199z"/>
+                </svg>
+                Order via WhatsApp
               </button>
-            </div> */}
+            )}
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      {cartItems.length > 0 && (
-        <footer className="bg-gray-100 p-4 border-t sticky bottom-0">
-          <button
-            onClick={() => {
-              alert('Proceeding to checkout... (Feature not implemented)')
-              navigate('/')
-            }}
-            className="w-full bg-teal-600 text-white py-3 rounded-md hover:bg-teal-700 transition font-semibold text-lg"
-          >
-            Proceed to Checkout (₹{total.toFixed(2)})
-          </button>
-        </footer>
-      )}
     </div>
   )
 }
