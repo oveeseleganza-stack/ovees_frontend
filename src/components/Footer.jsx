@@ -23,17 +23,23 @@ const Footer = () => {
           <div>
             <h3 className="text-xl sm:text-2xl font-bold mb-4">
               <span className="text-teal-400">OVEES</span>{' '}
-              <span className="text-orange-400">ELEGANZA</span>
+              <span className="text-yellow-400">ELEGANZA</span>
             </h3>
             <div className="space-y-2 text-sm sm:text-base">
               <p className="flex items-center gap-2">
                 <span>📱 Whats App</span>
               </p>
-              <p>+1 202-918-2132</p>
+              <p>+91 95626 54307</p>
               <p className="flex items-center gap-2 mt-4">
                 <span>📞 Call Us</span>
               </p>
-              <p>+1 202-918-2132</p>
+              <p>+91 95626 54307</p>
+              <p className="flex items-center gap-2 mt-4">
+                <span>📧 Email</span>
+              </p>
+              <a href="mailto:oveeseleganza@gmail.com" className="hover:text-teal-400 transition">
+                oveeseleganza@gmail.com
+              </a>
             </div>
           </div>
 
@@ -58,9 +64,9 @@ const Footer = () => {
               <li className="hover:text-teal-400 cursor-pointer">About Us</li>
               <li className="hover:text-teal-400 cursor-pointer">Terms & Conditions</li>
               <li className="hover:text-teal-400 cursor-pointer">FAQ</li>
-              <li className="hover:text-teal-400 cursor-pointer">Privacy Policy</li>
-              <li className="hover:text-teal-400 cursor-pointer">E-waste Policy</li>
-              <li className="hover:text-teal-400 cursor-pointer">Cancellation & Return Policy</li>
+              {/* <li className="hover:text-teal-400 cursor-pointer">Privacy Policy</li> */}
+              {/* <li className="hover:text-teal-400 cursor-pointer">E-waste Policy</li> */}
+              {/* <li className="hover:text-teal-400 cursor-pointer">Cancellation & Return Policy</li> */}
             </ul>
           </div>
 

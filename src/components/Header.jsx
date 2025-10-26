@@ -7,6 +7,7 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const [isMobileSearchExpanded, setIsMobileSearchExpanded] = useState(false)
   const [categories, setCategories] = useState([])
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [categoryProducts, setCategoryProducts] = useState({})
@@ -181,7 +182,7 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
     <header className={`bg-gray-700 shadow-md sticky top-0 z-40 transform transition-transform duration-300 ease-in-out ${
       isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
     }`}>
-      {/* <div className="bg-yellow-400 text-gray-800 py-2 px-4 text-center text-xs sm:text-sm font-semibold">
+      <div className="bg-yellow-400 text-gray-800 py-2 px-4 text-center text-xs sm:text-sm font-semibold">
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <span>🚚 Home Delivery </span>
           <span>|</span>
@@ -189,19 +190,28 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
           <span>|</span>
           <span>🛍️ All Offers</span>
         </div>
-      </div> */}
+      </div>
 
-      <div className="container mx-auto px-2 sm:px-4 py-2 flex items-center justify-between">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+      <div className={`container mx-auto px-2 sm:px-4 py-2 flex items-center justify-between transition-all duration-300 ${
+        isMobileSearchExpanded ? 'sm:flex' : 'flex'
+      }`}>
+        {/* Logo - Hidden on mobile when search expanded */}
+        <div className={`flex items-center gap-2 cursor-pointer transition-all duration-300 ${
+          isMobileSearchExpanded ? 'hidden sm:flex' : 'flex'
+        }`} onClick={() => navigate('/')}>
           <img src="/logoo.png" alt="Logo" className="h-10 sm:h-12" />
           <h1 className="text-xl sm:text-2xl font-bold">
             <span className="text-teal-400">OVEES</span>{' '}
-            <span className="text-orange-400">ELEGANZA</span>
+            <span className="text-yellow-400">ELEGANZA</span>
           </h1>
         </div>
 
-        {/* Search Bar */}
-        <div className="relative flex-1 max-w-md mx-4">
+        {/* Search Bar - Expandable on mobile */}
+        <div className={`relative transition-all duration-300 ${
+          isMobileSearchExpanded 
+            ? 'flex-1 mx-0 sm:flex-1 sm:max-w-md sm:mx-4' 
+            : 'hidden sm:block sm:flex-1 sm:max-w-md sm:mx-4'
+        }`}>
           <form onSubmit={handleSearch}>
             <div className="relative">
               <input
@@ -212,6 +222,7 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
                 onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
                 placeholder="Search items..."
                 className="w-full pl-10 pr-4 py-2 rounded-full bg-white border border-white focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm"
+                autoFocus={isMobileSearchExpanded}
               />
               <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
             </div>
@@ -232,7 +243,17 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
           )}
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className={`flex items-center gap-2 sm:gap-4 transition-all duration-300 ${
+          isMobileSearchExpanded ? 'hidden sm:flex' : 'flex'
+        }`}>
+          {/* Mobile Search Icon */}
+          <button
+            onClick={() => setIsMobileSearchExpanded(true)}
+            className="sm:hidden p-2 rounded-full hover:bg-gray-700 transition"
+          >
+            <Search className="w-6 h-6 text-white" />
+          </button>
+
           <button
             onClick={() => navigate('/cart')}
             className="relative flex items-center gap-2 px-3 py-2 rounded-full hover:bg-gray-700 transition"
@@ -252,6 +273,20 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
             {isMenuOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
           </button>
         </div>
+
+        {/* Mobile Search Close Button */}
+        {isMobileSearchExpanded && (
+          <button
+            onClick={() => {
+              setIsMobileSearchExpanded(false)
+              setSearchQuery('')
+              setSuggestions([])
+            }}
+            className="sm:hidden p-2 rounded-full hover:bg-gray-700 transition ml-2"
+          >
+            <X className="w-6 h-6 text-white" />
+          </button>
+        )}
       </div>
 
       {/* Desktop Category Bar - Flipkart Style */}
@@ -285,17 +320,22 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
 
 
       {/* Mobile Sidebar Menu - Slides from Left */}
-      {isMenuOpen && (
-        <>
-          {/* Overlay */}
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-30 sm:hidden"
-            onClick={() => setIsMenuOpen(false)}
-          />
-          {/* Sidebar */}
-          <div className="fixed left-0 top-0 h-full w-64 bg-white shadow-2xl z-40 sm:hidden transform transition-transform duration-300 ease-in-out overflow-y-auto">
+      <div className={`fixed left-0 top-16 right-0 bottom-0 z-30 sm:hidden transition-opacity duration-300 ease-in-out ${
+        isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+      }`}>
+        {/* Overlay */}
+        <div
+          className="absolute inset-0 bg-black bg-opacity-50"
+          onClick={() => setIsMenuOpen(false)}
+        />
+      </div>
+
+      {/* Sidebar */}
+      <div className={`fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-white shadow-2xl z-40 sm:hidden transform transition-transform duration-300 ease-in-out overflow-y-auto ${
+        isMenuOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
             {/* Close Button */}
-            <div className="flex items-center justify-between p-4 border-b">
+            <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white">
               <h2 className="text-lg font-bold text-gray-800">Categories</h2>
               <button
                 onClick={() => setIsMenuOpen(false)}
@@ -309,7 +349,10 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
               {categories.map((cat) => (
                 <button
                   key={cat.id}
-                  onClick={() => handleCategoryClick(cat)}
+                  onClick={() => {
+                    handleCategoryClick(cat)
+                    setIsMenuOpen(false)
+                  }}
                   className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-teal-100 hover:text-teal-700 transition flex items-center gap-3"
                 >
                   {cat.icon_url && (
@@ -324,9 +367,7 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
                 </button>
               ))}
             </div>
-          </div>
-        </>
-      )}
+      </div>
 
     </header>
   )
