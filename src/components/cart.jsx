@@ -50,6 +50,8 @@ const Cart = ({ setIsCartOpen, cartItems, removeFromCart, updateQuantity }) => {
                         src={item.images?.[0] || 'https://via.placeholder.com/80'}
                         alt={item.name}
                         className="w-20 h-20 object-cover rounded"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <div>
                         <h3 className="text-md font-medium text-gray-800">{item.name}</h3>

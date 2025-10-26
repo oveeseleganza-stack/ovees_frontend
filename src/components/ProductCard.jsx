@@ -42,7 +42,13 @@ const ProductCard = ({ product, onProductClick, onAddToCart, cartItems = [] }) =
       isClicked ? 'scale-95' : ''
     }`}>
       <div className="relative cursor-pointer" onClick={onProductClick}>
-        <img src={imageUrl} alt={product.name} className="w-full h-48 object-cover" />
+        <img 
+          src={imageUrl} 
+          alt={product.name} 
+          className="w-full h-48 object-cover"
+          loading="lazy"
+          decoding="async"
+        />
         {product.stock_quantity > 0 ? (
           <span className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded-md text-xs font-semibold">
             In Stock

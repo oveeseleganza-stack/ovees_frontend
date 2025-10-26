@@ -58,6 +58,8 @@ const BannerCards = ({ onCardClick }) => {
             src={card.image}
             alt={card.title}
             className="w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
           />
           
           {/* Overlay */}

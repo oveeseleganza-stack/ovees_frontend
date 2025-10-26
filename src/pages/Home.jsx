@@ -21,7 +21,9 @@ const Home = ({ addToCart, cartItems = [] }) => {
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [activeSection, setActiveSection] = useState(null)
   const observerTarget = useRef(null)
-  const ITEMS_PER_PAGE = 20
+  const loadingRef = useRef(false)
+  const currentPageRef = useRef(1)
+  const ITEMS_PER_PAGE = 30
 
   // Fetch 99 Store Products
   useEffect(() => {
@@ -87,18 +89,19 @@ const Home = ({ addToCart, cartItems = [] }) => {
     loadNewArrivals()
   }, [])
 
-  // Fetch all products
-  const loadProducts = async () => {
-    if (loading || !hasMore) return
+  // Fetch all products with debounce to prevent duplicate loads
+  const loadProducts = React.useCallback(async () => {
+    if (loadingRef.current || !hasMore) return
 
+    loadingRef.current = true
     setLoading(true)
     setError(null)
     
     try {
-      const currentPage = Math.floor(allProducts.length / ITEMS_PER_PAGE) + 1
-      console.log(`🔄 Loading products: page=${currentPage}, page_size=${ITEMS_PER_PAGE}`)
+      const pageToLoad = currentPageRef.current
+      console.log(`🔄 Loading products: page=${pageToLoad}, page_size=${ITEMS_PER_PAGE}`)
       
-      const response = await fetchProducts(currentPage, ITEMS_PER_PAGE, true)
+      const response = await fetchProducts(pageToLoad, ITEMS_PER_PAGE, true)
       const data = response.items || []
       const meta = response.meta || {}
       
@@ -107,6 +110,9 @@ const Home = ({ addToCart, cartItems = [] }) => {
       if (!meta.has_next || data.length === 0) {
         setHasMore(false)
         console.log('🏁 No more products to load')
+      } else {
+        // Increment page for next load
+        currentPageRef.current += 1
       }
       
       if (data.length > 0) {
@@ -122,8 +128,9 @@ const Home = ({ addToCart, cartItems = [] }) => {
       console.error('❌ Failed to load products:', err)
     } finally {
       setLoading(false)
+      loadingRef.current = false
     }
-  }
+  }, [hasMore])
 
   // Initial load for all products
   useEffect(() => {
@@ -135,14 +142,14 @@ const Home = ({ addToCart, cartItems = [] }) => {
     const observer = new IntersectionObserver(
       entries => {
         const target = entries[0]
-        if (target.isIntersecting && hasMore && !loading) {
+        if (target.isIntersecting && hasMore && !loadingRef.current) {
           console.log('📜 Observer triggered - loading more...')
           loadProducts()
         }
       },
       { 
         threshold: 0.1,
-        rootMargin: '100px'
+        rootMargin: '50px'
       }
     )
 
@@ -154,8 +161,9 @@ const Home = ({ addToCart, cartItems = [] }) => {
       if (observerTarget.current) {
         observer.unobserve(observerTarget.current)
       }
+      observer.disconnect()
     }
-  }, [hasMore, loading])
+  }, [hasMore, loadProducts, loadingRef])
 
   // Handle Add Combo to Cart
   const handleAddComboToCart = (combo) => {
@@ -339,6 +347,8 @@ const Home = ({ addToCart, cartItems = [] }) => {
                         src={item.product.images[0] || 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&h=400&fit=crop'} 
                         alt={item.product.name} 
                         className="w-full h-24 object-cover rounded-md mb-2"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <p className="text-sm font-medium text-gray-700">{item.product.name}</p>
                       <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
@@ -388,9 +398,8 @@ const Home = ({ addToCart, cartItems = [] }) => {
             ))}
           </div>
 
-          {!loading && (
-            <div ref={observerTarget} className="h-10" />
-          )}
+          {/* Observer target - always present to trigger loading */}
+          <div ref={observerTarget} className="h-10 mt-8" />
 
           {!hasMore && allProducts.length > 0 && !loading && (
             <div className="text-center py-8 text-gray-500">

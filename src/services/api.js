@@ -28,7 +28,7 @@ export const fetchCategories = async () => {
   }
 }
 
-export const fetchProducts = async (page = 1, pageSize = 20, isActive = true, categoryId = null, sortBy = null, minPrice = null, maxPrice = null) => {
+export const fetchProducts = async (page = 1, pageSize = 12, isActive = true, categoryId = null, sortBy = null, minPrice = null, maxPrice = null) => {
   try {
     const params = new URLSearchParams({
       page: page.toString(),
@@ -57,7 +57,7 @@ export const fetchProducts = async (page = 1, pageSize = 20, isActive = true, ca
   }
 }
 
-export const fetchNinetynineStore = async (page = 1, pageSize = 100) => {
+export const fetchNinetynineStore = async (page = 1, pageSize = 12) => {
   try {
     const response = await fetch(
       `${API_BASE_URL}/products/collection/99-store?page=${page}&page_size=${pageSize}`
@@ -76,7 +76,7 @@ export const fetchNinetynineStore = async (page = 1, pageSize = 100) => {
   }
 }
 
-export const fetchOneNinetyNineStore = async (page = 1, pageSize = 20) => {
+export const fetchOneNinetyNineStore = async (page = 1, pageSize = 12) => {
   try {
     const response = await fetch(
       `${API_BASE_URL}/products/collection/199-store?page=${page}&page_size=${pageSize}`
@@ -95,7 +95,7 @@ export const fetchOneNinetyNineStore = async (page = 1, pageSize = 20) => {
   }
 }
 
-export const fetchCombos = async (page = 1, pageSize = 20, isActive = true) => {
+export const fetchCombos = async (page = 1, pageSize = 12, isActive = true) => {
   try {
     const response = await fetch(
       `${API_BASE_URL}/combos?page=${page}&page_size=${pageSize}&is_active=${isActive}`
@@ -114,7 +114,7 @@ export const fetchCombos = async (page = 1, pageSize = 20, isActive = true) => {
   }
 }
 
-export const fetchNewArrivals = async (page = 1, pageSize = 20, isActive = true) => {
+export const fetchNewArrivals = async (page = 1, pageSize = 12, isActive = true) => {
   try {
     const response = await fetch(
       `${API_BASE_URL}/new-arrivals?page=${page}&page_size=${pageSize}&is_active=${isActive}`
@@ -133,7 +133,7 @@ export const fetchNewArrivals = async (page = 1, pageSize = 20, isActive = true)
   }
 }
 
-export const searchProducts = async (query, page = 1, pageSize = 20, isActive = true, categoryId = null, sortBy = null, minPrice = null, maxPrice = null) => {
+export const searchProducts = async (query, page = 1, pageSize = 12, isActive = true, categoryId = null, sortBy = null, minPrice = null, maxPrice = null) => {
   try {
     const params = new URLSearchParams({
       search: query,
