@@ -2,7 +2,7 @@ import React from 'react'
 import { Trash2, Tag, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { saveOrderToStorage, getPreviousOrders, clearCartCookie } from '../utils/cartStorage'
-import { sendCartOrderViaWhatsapp } from '../utils/cartWhatsapp'
+import { sendCartOrderViaWhatsapp, openCartOrderPrintPreview } from '../utils/cartWhatsapp'
 
 const CartPage = ({ cartItems, removeFromCart, updateQuantity, loadPreviousOrder }) => {
   const navigate = useNavigate()
@@ -21,6 +21,9 @@ const CartPage = ({ cartItems, removeFromCart, updateQuantity, loadPreviousOrder
   const handleWhatsAppCheckout = () => {
     if (cartItems.length === 0) return
     
+    // Open print preview (user can save as PDF)
+    // openCartOrderPrintPreview(cartItems, subtotal, discount, deliveryCharge, total)
+
     // Save order to local storage
     saveOrderToStorage(cartItems)
 

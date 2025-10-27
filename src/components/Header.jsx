@@ -277,8 +277,8 @@ const Header = ({ cartCount, addToCart, setSelectedProduct, onCartIconClick }) =
             )}
           </button>
           {/* Order History Button */}
-          {/* <button
-            onClick={() => setOrderHistoryOpen(true)}
+          <button
+            onClick={() => navigate('/orders')}
             className="relative flex items-center gap-2 px-3 py-2 rounded-full hover:bg-gray-700 transition"
           >
             <BookOpen className="w-6 h-6 text-white" />
@@ -289,7 +289,7 @@ const Header = ({ cartCount, addToCart, setSelectedProduct, onCartIconClick }) =
             className="sm:hidden p-2 rounded-full hover:bg-gray-700 transition"
           >
             {isMenuOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
-          </button> */}
+          </button>
         </div>
 
         {/* Mobile Search Close Button */}
