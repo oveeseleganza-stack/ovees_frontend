@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { ShoppingCart, Search, Menu, X, Loader2 } from 'lucide-react'
+import { ShoppingCart, Search, Menu, X, Loader2, BookOpen } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { fetchCategories, searchProducts, fetchProducts } from '../services/api'
+import { getPreviousOrders } from '../utils/cartStorage'
 
-const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
+const Header = ({ cartCount, addToCart, setSelectedProduct, onCartIconClick }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [isSearchFocused, setIsSearchFocused] = useState(false)
@@ -20,6 +21,14 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const ITEMS_PER_PAGE = 10
+  const [orderHistoryOpen, setOrderHistoryOpen] = useState(false)
+  const [previousOrders, setPreviousOrders] = useState([])
+
+  useEffect(() => {
+    if (orderHistoryOpen) {
+      setPreviousOrders(getPreviousOrders())
+    }
+  }, [orderHistoryOpen])
 
   // Fetch categories
   useEffect(() => {
@@ -254,8 +263,16 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
             <Search className="w-6 h-6 text-white" />
           </button>
 
+          {/* Cart Icon */}
           <button
-            onClick={() => navigate('/cart')}
+            onClick={(e) => {
+              if (window.innerWidth >= 768 && onCartIconClick) {
+                e.preventDefault();
+                onCartIconClick();
+              } else {
+                navigate('/cart');
+              }
+            }}
             className="relative flex items-center gap-2 px-3 py-2 rounded-full hover:bg-gray-700 transition"
           >
             <ShoppingCart className="w-6 h-6 text-white" />
@@ -266,12 +283,20 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
               </span>
             )}
           </button>
+          {/* Order History Button */}
+          {/* <button
+            onClick={() => setOrderHistoryOpen(true)}
+            className="relative flex items-center gap-2 px-3 py-2 rounded-full hover:bg-gray-700 transition"
+          >
+            <BookOpen className="w-6 h-6 text-white" />
+            <span className="text-white text-sm font-medium hidden sm:inline">Order History</span>
+          </button>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="sm:hidden p-2 rounded-full hover:bg-gray-700 transition"
           >
             {isMenuOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
-          </button>
+          </button> */}
         </div>
 
         {/* Mobile Search Close Button */}
@@ -369,6 +394,63 @@ const Header = ({ cartCount, addToCart, setSelectedProduct }) => {
             </div>
       </div>
 
+      {/* Order History Modal */}
+      {orderHistoryOpen && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40">
+          <div className="bg-white max-w-lg w-full rounded-2xl shadow-2xl p-7 relative overflow-y-auto max-h-[90vh] px-4">
+            <button className="absolute top-3 right-3 p-1 text-gray-500 hover:text-gray-800" onClick={() => setOrderHistoryOpen(false)}><X className="w-6 h-6" /></button>
+            <h2 className="text-2xl font-bold text-gray-900 mb-5 flex items-center gap-2"><BookOpen className="w-6 h-6" /> Order History</h2>
+            {previousOrders.length === 0 ? (
+              <div className="text-gray-400 py-10 text-center">No previous orders found.</div>
+            ) : (
+              <div className="space-y-6">
+                {previousOrders.map((order) => {
+                  const orderTotal = order.items.reduce((sum, item) => {
+                    const price = item.offer_price || item.normal_price || item.price || 0;
+                    return sum + price * item.quantity;
+                  }, 0)
+                  return (
+                    <div key={order.id} className="border rounded-lg p-4 bg-gray-50 hover:shadow-lg transition">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <p className="text-xs text-gray-500 uppercase font-medium mb-1">Order Date</p>
+                          <p className="text-sm font-semibold text-gray-800">{new Date(order.timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                          <p className="text-xs text-gray-500">{new Date(order.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-gray-500 uppercase font-medium mb-1">Total</p>
+                          <p className="text-lg font-bold text-teal-600">₹{orderTotal.toFixed(2)}</p>
+                          <p className="text-xs text-gray-500">{order.items.length} item{order.items.length > 1 ? 's' : ''}</p>
+                        </div>
+                      </div>
+                      <div className="bg-white rounded-md p-3 mb-3 max-h-40 overflow-y-auto">
+                        {order.items.map((item, idx) => {
+                          const itemPrice = item.offer_price || item.normal_price || item.price || 0
+                          return (
+                            <div key={item.id} className={`flex justify-between items-center py-2 ${idx !== order.items.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                              <div className="flex items-center gap-2 flex-1">
+                                {item.images?.[0] && (
+                                  <img src={item.images[0]} alt={item.name} className="w-10 h-10 object-cover rounded mr-2" />
+                                )}
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900">{item.name}</p>
+                                  <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                                </div>
+                              </div>
+                              <span className="text-sm font-semibold text-gray-700">₹{(itemPrice * item.quantity).toFixed(2)}</span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                      {/* Optionally: you can add a 'Reorder' button here */}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   )
 }

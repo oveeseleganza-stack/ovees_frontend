@@ -8,6 +8,7 @@ import ProductCardSkeleton from '../components/ProductCardSkeleton'
 import ProductDetailModal from '../components/ProductDetailModal'
 import { fetchProducts, fetchNinetynineStore, fetchOneNinetyNineStore, fetchCombos, fetchNewArrivals } from '../services/api'
 import { Loader2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const Home = ({ addToCart, cartItems = [] }) => {
   const [allProducts, setAllProducts] = useState([])
@@ -24,6 +25,9 @@ const Home = ({ addToCart, cartItems = [] }) => {
   const loadingRef = useRef(false)
   const currentPageRef = useRef(1)
   const ITEMS_PER_PAGE = 10
+  const navigate = useNavigate()
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [snackbarProduct, setSnackbarProduct] = useState(null)
 
   // Fetch 99 Store Products
   useEffect(() => {
@@ -183,6 +187,16 @@ const Home = ({ addToCart, cartItems = [] }) => {
     }, 1)
   }
 
+  // Wrap the incoming addToCart to show snackbar on mobile
+  const handleAddToCart = (item, quantity = 1) => {
+    addToCart(item, quantity)
+    if (window.innerWidth < 768) {
+      setSnackbarProduct(item)
+      setSnackbarOpen(true)
+      setTimeout(() => setSnackbarOpen(false), 2500)
+    }
+  }
+
   // Handle banner card click
   const handleBannerCardClick = (sectionId) => {
     setActiveSection(sectionId)
@@ -241,7 +255,7 @@ const Home = ({ addToCart, cartItems = [] }) => {
                 key={product.id} 
                 product={product} 
                 onProductClick={() => setSelectedProduct(product)}
-                onAddToCart={addToCart}
+                onAddToCart={handleAddToCart}
                 cartItems={cartItems}
               />
             ))}
@@ -285,6 +299,15 @@ const Home = ({ addToCart, cartItems = [] }) => {
           onClose={() => setSelectedProduct(null)}
           onAddToCart={addToCart}
         />
+      )}
+
+      {/* Snackbar for mobile, fixed at bottom center */}
+      {snackbarOpen && (
+        <div className="md:hidden fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-4 z-[120] animate-fade-in">
+          <span className="text-white text-base flex items-center gap-1">🛒 <span className="hidden xs:inline">Item added to cart!</span></span>
+          <button onClick={() => { setSnackbarOpen(false); navigate('/cart')}} className="ml-2 bg-emerald-500 hover:bg-emerald-600 rounded px-4 py-1 font-bold text-white">View Cart</button>
+          <button onClick={() => setSnackbarOpen(false)} className="text-gray-400 hover:text-white ml-1">✕</button>
+        </div>
       )}
     </div>
   )

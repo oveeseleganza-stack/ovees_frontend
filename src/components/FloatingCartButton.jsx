@@ -2,16 +2,25 @@ import React from 'react'
 import { ShoppingCart } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-const FloatingCartButton = ({ cartCount }) => {
+const FloatingCartButton = ({ cartCount, onCartClick }) => {
   const navigate = useNavigate()
 
-  // Don't show if cart is empty
   if (cartCount === 0) return null
+
+  // Use responsive styles: center bottom on mobile, right bottom on desktop
+  // OnClick logic: desktop fire onCartClick, mobile go to /cart
+  const handleClick = () => {
+    if (window.innerWidth >= 768 && typeof onCartClick === 'function') {
+      onCartClick()
+    } else {
+      navigate('/cart')
+    }
+  }
 
   return (
     <button
-      onClick={() => navigate('/cart')}
-      className="fixed bottom-6 right-6 bg-gradient-to-r from-teal-500 to-emerald-500 text-white px-6 py-3 rounded-full shadow-2xl hover:shadow-3xl transform hover:scale-110 transition-all duration-300 flex items-center gap-3 z-50 group animate-bounce-slow"
+      onClick={handleClick}
+      className="fixed bottom-5 left-1/2 -translate-x-1/2 sm:right-6 sm:left-auto sm:translate-x-0 sm:bottom-6 bg-gradient-to-r from-teal-500 to-emerald-500 text-white px-6 py-3 rounded-full shadow-2xl hover:shadow-3xl transform hover:scale-110 transition-all duration-300 flex items-center gap-3 z-50 group animate-bounce-slow"
       aria-label="View Cart"
     >
       <div className="relative">
@@ -22,9 +31,7 @@ const FloatingCartButton = ({ cartCount }) => {
           </span>
         )}
       </div>
-      <span className="font-semibold hidden sm:block group-hover:block">
-        View Cart
-      </span>
+      <span className="font-semibold ml-2">View Cart</span>
     </button>
   )
 }

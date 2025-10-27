@@ -22,10 +22,12 @@ const CartPage = ({ cartItems, removeFromCart, updateQuantity, loadPreviousOrder
 
     // Build message with cart details
     let message = `*Order Details*\n\n`
+    
     message += `*Items:*\n`
     cartItems.forEach((item) => {
       const price = item.offer_price || item.normal_price || item.price || 0
       message += `• ${item.name}\n`
+
       message += `  Qty: ${item.quantity} × ₹${price.toFixed(2)} = ₹${(price * item.quantity).toFixed(2)}\n`
       if (item.is_combo && item.combo_products) {
         item.combo_products.forEach((p) => {
@@ -134,87 +136,6 @@ const CartPage = ({ cartItems, removeFromCart, updateQuantity, loadPreviousOrder
                     </div>
                   </div>
                 ))}
-              </div>
-            )}
-           {/* Previous Orders Section */}
-            {previousOrders.length > 0 && (
-              <div className="mt-12 bg-white rounded-lg shadow-md p-6">
-                <div className="flex items-center gap-2 mb-6">
-                  <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <h3 className="text-xl font-bold text-gray-800">Order History</h3>
-                </div>
-                <div className="space-y-4">
-                  {previousOrders.map((order) => {
-                    const orderTotal = order.items.reduce((sum, item) => {
-                      const price = item.offer_price || item.normal_price || item.price || 0
-                      return sum + price * item.quantity
-                    }, 0)
-                    
-                    return (
-                      <div key={order.id} className="border border-gray-200 rounded-lg p-5 hover:shadow-lg transition-shadow bg-gray-50">
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Order Date</p>
-                            <p className="text-sm font-semibold text-gray-800">
-                              {new Date(order.timestamp).toLocaleDateString('en-IN', { 
-                                day: 'numeric', 
-                                month: 'short', 
-                                year: 'numeric' 
-                              })}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {new Date(order.timestamp).toLocaleTimeString('en-IN', { 
-                                hour: '2-digit', 
-                                minute: '2-digit' 
-                              })}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Total</p>
-                            <p className="text-lg font-bold text-teal-600">₹{orderTotal.toFixed(2)}</p>
-                            <p className="text-xs text-gray-500">{order.items.length} item{order.items.length > 1 ? 's' : ''}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="bg-white rounded-md p-3 mb-4 max-h-40 overflow-y-auto">
-                          {order.items.map((item, idx) => {
-                            const itemPrice = item.offer_price || item.normal_price || item.price || 0
-                            return (
-                              <div key={item.id} className={`flex justify-between items-center py-2 ${idx !== order.items.length - 1 ? 'border-b border-gray-100' : ''}`}>
-                                <div className="flex items-center gap-3 flex-1">
-                                  {item.images?.[0] && (
-                                    <img 
-                                      src={item.images[0]} 
-                                      alt={item.name}
-                                      className="w-10 h-10 object-cover rounded"
-                                    />
-                                  )}
-                                  <div>
-                                    <p className="text-sm font-medium text-gray-800">{item.name}</p>
-                                    <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
-                                  </div>
-                                </div>
-                                <p className="text-sm font-semibold text-gray-700">₹{(itemPrice * item.quantity).toFixed(2)}</p>
-                              </div>
-                            )
-                          })}
-                        </div>
-                        
-                        <button
-                          onClick={() => loadPreviousOrder(order.items)}
-                          className="w-full bg-teal-600 text-white py-2.5 px-4 rounded-md hover:bg-teal-700 transition font-semibold text-sm flex items-center justify-center gap-2 shadow-sm"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                          </svg>
-                          Reorder
-                        </button>
-                      </div>
-                    )
-                  })}
-                </div>
               </div>
             )}
           </div>

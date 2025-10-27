@@ -28,7 +28,7 @@ const BannerCards = ({ onCardClick }) => {
     {
       id: '199-store',
       title: '₹199 Store',
-      image: '/banners/199.jpg',
+      image: '/banners/199.jpeg',
       color: 'from-blue-400 to-blue-600',
       bgColor: 'bg-blue-50',
       borderColor: 'border-blue-200',

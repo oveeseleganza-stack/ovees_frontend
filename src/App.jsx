@@ -11,6 +11,7 @@ import OneNinetynineStorePage from './pages/OneNinetynineStorePage'
 import CombosPage from './pages/CombosPage'
 import ProductDetailModal from './components/ProductDetailModal'
 import FloatingCartButton from './components/FloatingCartButton'
+import CartSidebar from './components/CartSidebar'
 import { saveCartToCookie, getCartFromCookie } from './utils/cartStorage'
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
     return getCartFromCookie()
   })
   const [selectedProduct, setSelectedProduct] = useState(null)
+  const [isCartSidebarOpen, setIsCartSidebarOpen] = useState(false)
 
   const addToCart = (item, quantity = 1) => {
     console.log('Adding to cart:', item, quantity)
@@ -43,6 +45,7 @@ function App() {
       }
       return prev
     })
+    setIsCartSidebarOpen(true) // Open sidebar on add
   }
 
   const removeFromCart = (itemId) => {
@@ -80,6 +83,7 @@ function App() {
           cartCount={cartItems.length}
           addToCart={addToCart}
           setSelectedProduct={setSelectedProduct}
+          onCartIconClick={() => setIsCartSidebarOpen(true)} // Add prop to open sidebar
         />
         {selectedProduct && (
           <ProductDetailModal 
@@ -105,7 +109,18 @@ function App() {
           <Route path="/199-store" element={<OneNinetynineStorePage addToCart={addToCart} cartItems={cartItems} />} />
           <Route path="/combos" element={<CombosPage addToCart={addToCart} cartItems={cartItems} />} />
         </Routes>
-        <FloatingCartButton cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)} />
+        {/* Cart Sidebar: Only for desktop (hidden on mobile) */}
+        <CartSidebar
+          isOpen={isCartSidebarOpen}
+          onClose={() => setIsCartSidebarOpen(false)}
+          cartItems={cartItems}
+          removeFromCart={removeFromCart}
+          updateQuantity={updateQuantity}
+        />
+        <FloatingCartButton 
+          cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)} 
+          onCartClick={() => setIsCartSidebarOpen(true)}
+        />
       </div>
     </BrowserRouter>
   )
