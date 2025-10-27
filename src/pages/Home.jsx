@@ -301,12 +301,13 @@ const Home = ({ addToCart, cartItems = [] }) => {
         />
       )}
 
-      {/* Snackbar for mobile, fixed at bottom center */}
-      {snackbarOpen && (
-        <div className="md:hidden fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-4 z-[120] animate-fade-in">
-          <span className="text-white text-base flex items-center gap-1">🛒 <span className="hidden xs:inline">Item added to cart!</span></span>
-          <button onClick={() => { setSnackbarOpen(false); navigate('/cart')}} className="ml-2 bg-emerald-500 hover:bg-emerald-600 rounded px-4 py-1 font-bold text-white">View Cart</button>
-          <button onClick={() => setSnackbarOpen(false)} className="text-gray-400 hover:text-white ml-1">✕</button>
+    {/* Snackbar for mobile, fixed at bottom center */}
+    {snackbarOpen && (
+        <div className="md:hidden fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-4 py-3 rounded-full shadow-lg flex items-center gap-3 z-[120] animate-fade-in min-w-[280px] justify-center">
+          <span className="text-white text-sm font-medium flex items-center gap-2">
+            🛒 Item added to cart!
+          </span>
+          <button onClick={() => setSnackbarOpen(false)} className="text-gray-400 hover:text-white">✕</button>
         </div>
       )}
     </div>
