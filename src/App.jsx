@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import { useState, useEffect } from 'react'
 import Home from './pages/Home'
 import SearchResults from './pages/SearchResults'
@@ -79,6 +81,8 @@ function App() {
   return (
     <BrowserRouter>
       <div className="font-sans relative min-h-screen">
+        <Analytics />
+        <SpeedInsights />
         <Header 
           cartCount={cartItems.length}
           addToCart={addToCart}
