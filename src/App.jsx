@@ -1,6 +1,6 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Home from './pages/Home'
 import SearchResults from './pages/SearchResults'
@@ -15,6 +15,18 @@ import ProductDetailModal from './components/ProductDetailModal'
 import FloatingCartButton from './components/FloatingCartButton'
 import CartSidebar from './components/CartSidebar'
 import { saveCartToCookie, getCartFromCookie } from './utils/cartStorage'
+import OrderHistory from './pages/OrderHistory'
+
+function CartFAB({ cartItems, onCartClick }) {
+  const location = useLocation()
+  if (location.pathname === '/cart') return null
+  return (
+    <FloatingCartButton
+      cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+      onCartClick={onCartClick}
+    />
+  )
+}
 
 function App() {
   const [cartItems, setCartItems] = useState(() => {
@@ -112,6 +124,7 @@ function App() {
           <Route path="/99-store" element={<NinetynineStorePage addToCart={addToCart} cartItems={cartItems} />} />
           <Route path="/199-store" element={<OneNinetynineStorePage addToCart={addToCart} cartItems={cartItems} />} />
           <Route path="/combos" element={<CombosPage addToCart={addToCart} cartItems={cartItems} />} />
+          <Route path="/orders" element={<OrderHistory />} />
         </Routes>
         {/* Cart Sidebar: Only for desktop (hidden on mobile) */}
         <CartSidebar
@@ -121,8 +134,8 @@ function App() {
           removeFromCart={removeFromCart}
           updateQuantity={updateQuantity}
         />
-        <FloatingCartButton 
-          cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)} 
+          <CartFAB
+          cartItems={cartItems}
           onCartClick={() => setIsCartSidebarOpen(true)}
         />
       </div>

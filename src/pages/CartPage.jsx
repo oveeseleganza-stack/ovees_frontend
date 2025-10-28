@@ -1,11 +1,41 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Trash2, Tag, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { saveOrderToStorage, getPreviousOrders, clearCartCookie } from '../utils/cartStorage'
+import { saveOrderToStorage, getPreviousOrders, clearCartCookie, getPendingReorder, clearPendingReorder } from '../utils/cartStorage'
+import { sendCartOrderViaWhatsapp, openCartOrderPrintPreview } from '../utils/cartWhatsapp'
 
 const CartPage = ({ cartItems, removeFromCart, updateQuantity, loadPreviousOrder }) => {
   const navigate = useNavigate()
   const previousOrders = getPreviousOrders()
+
+  // Apply pending reorder if present
+  useEffect(() => {
+    const pending = getPendingReorder()
+    if (!pending || !pending.items || pending.items.length === 0) return
+
+    const mode = pending.mode === 'merge' ? 'merge' : 'replace'
+    let nextCart = []
+    if (mode === 'replace') {
+      nextCart = pending.items
+    } else {
+      const map = new Map()
+      // seed with existing cart
+      cartItems.forEach((it) => map.set(it.id, { ...it }))
+      // merge in reorder items by id
+      pending.items.forEach((it) => {
+        if (map.has(it.id)) {
+          const prev = map.get(it.id)
+          map.set(it.id, { ...prev, quantity: (prev.quantity || 0) + (it.quantity || 0) })
+        } else {
+          map.set(it.id, { ...it })
+        }
+      })
+      nextCart = Array.from(map.values())
+    }
+    loadPreviousOrder(nextCart)
+    clearPendingReorder()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Calculate totals
   const subtotal = cartItems.reduce((sum, item) => {
@@ -19,40 +49,19 @@ const CartPage = ({ cartItems, removeFromCart, updateQuantity, loadPreviousOrder
   // Handle WhatsApp checkout
   const handleWhatsAppCheckout = () => {
     if (cartItems.length === 0) return
-
-    // Build message with cart details
-    let message = `*Order Details*\n\n`
     
-    message += `*Items:*\n`
-    cartItems.forEach((item) => {
-      const price = item.offer_price || item.normal_price || item.price || 0
-      message += `• ${item.name}\n`
-
-      message += `  Qty: ${item.quantity} × ₹${price.toFixed(2)} = ₹${(price * item.quantity).toFixed(2)}\n`
-      if (item.is_combo && item.combo_products) {
-        item.combo_products.forEach((p) => {
-          message += `  └─ ${p.name} (x${p.quantity})\n`
-        })
-      }
-    })
-    message += `\n*Price Summary:*\n`
-    message += `Subtotal: ₹${subtotal.toFixed(2)}\n`
-    message += `Discount (10%): -₹${discount.toFixed(2)}\n`
-    message += `Delivery Charge: ${deliveryCharge === 0 ? 'Free' : `₹${deliveryCharge.toFixed(2)}`}\n`
-    message += `*Total: ₹${total.toFixed(2)}*\n\n`
-    message += `Please confirm this order. Thank you!`
+    // Open print preview (user can save as PDF)
+    // openCartOrderPrintPreview(cartItems, subtotal, discount, deliveryCharge, total)
 
     // Save order to local storage
     saveOrderToStorage(cartItems)
 
+    // Send order via WhatsApp with detailed cart breakdown
+    sendCartOrderViaWhatsapp(cartItems, subtotal, discount, deliveryCharge, total)
+
     // Clear cart and cookies
     clearCartCookie()
     loadPreviousOrder([]) // Clear current cart
-
-    // Open WhatsApp
-    const encodedMessage = encodeURIComponent(message)
-    const whatsappUrl = `https://wa.me/918129690147?text=${encodedMessage}`
-    window.open(whatsappUrl, '_blank')
   }
 
   return (

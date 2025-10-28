@@ -1,6 +1,7 @@
 // cartStorage.js
 const CART_COOKIE_NAME = 'ovees_cart'
 const ORDERS_STORAGE_KEY = 'ovees_previous_orders'
+const PENDING_REORDER_KEY = 'ovees_pending_reorder'
 const COOKIE_EXPIRY_DAYS = 30
 
 /**
@@ -93,5 +94,34 @@ export const getPreviousOrders = () => {
   } catch (error) {
     console.error('❌ Error reading previous orders:', error)
     return []
+  }
+}
+
+// Pending reorder helpers
+export const setPendingReorder = (orderItems, mode = 'merge') => {
+  try {
+    const payload = { items: orderItems, mode, timestamp: Date.now() }
+    localStorage.setItem(PENDING_REORDER_KEY, JSON.stringify(payload))
+  } catch (error) {
+    console.error('❌ Error setting pending reorder:', error)
+  }
+}
+
+export const getPendingReorder = () => {
+  try {
+    const raw = localStorage.getItem(PENDING_REORDER_KEY)
+    if (!raw) return null
+    return JSON.parse(raw)
+  } catch (error) {
+    console.error('❌ Error reading pending reorder:', error)
+    return null
+  }
+}
+
+export const clearPendingReorder = () => {
+  try {
+    localStorage.removeItem(PENDING_REORDER_KEY)
+  } catch (error) {
+    console.error('❌ Error clearing pending reorder:', error)
   }
 }

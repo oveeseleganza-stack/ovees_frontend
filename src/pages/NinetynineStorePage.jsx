@@ -84,7 +84,7 @@ const NinetynineStorePage = ({ addToCart, cartItems = [] }) => {
               Unbeatable prices on amazing products! Shop smart, save big. Everything you need at pocket-friendly prices.
             </p>
             
-            <div className="flex flex-wrap gap-3 sm:gap-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+            {/* <div className="flex flex-wrap gap-3 sm:gap-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
               <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2.5 rounded-full border border-white/30">
                 <TrendingDown className="w-5 h-5 text-yellow-300" />
                 <span className="text-sm font-bold">Best Prices</span>
@@ -97,7 +97,7 @@ const NinetynineStorePage = ({ addToCart, cartItems = [] }) => {
                 <Flame className="w-5 h-5" />
                 <span className="text-sm">Limited Time</span>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
         
@@ -139,7 +139,7 @@ const NinetynineStorePage = ({ addToCart, cartItems = [] }) => {
         ) : (
           <>
             {/* Promotional Banner */}
-            <div className="mb-8 relative overflow-hidden bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-2xl shadow-xl p-6 sm:p-8 border-2 border-orange-200">
+            {/* <div className="mb-8 relative overflow-hidden bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-2xl shadow-xl p-6 sm:p-8 border-2 border-orange-200">
               <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utb3BhY2l0eT0iLjEiLz48L2c+PC9zdmc+')] opacity-30"></div>
               
               <div className="relative flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -167,7 +167,7 @@ const NinetynineStorePage = ({ addToCart, cartItems = [] }) => {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Products Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">

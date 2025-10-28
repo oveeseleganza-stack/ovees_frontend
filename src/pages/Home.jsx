@@ -199,14 +199,22 @@ const Home = ({ addToCart, cartItems = [] }) => {
 
   // Handle banner card click
   const handleBannerCardClick = (sectionId) => {
-    setActiveSection(sectionId)
-    // Scroll to section
-    setTimeout(() => {
-      const element = document.getElementById(`section-${sectionId}`)
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }
-    }, 100)
+    switch (sectionId) {
+      case 'new-arrivals':
+        navigate('/new-arrivals')
+        break
+      case 'combos':
+        navigate('/combos')
+        break
+      case '199-store':
+        navigate('/199-store')
+        break
+      case '99-store':
+        navigate('/99-store')
+        break
+      default:
+        break
+    }
   }
 
   // Get products to display based on active section

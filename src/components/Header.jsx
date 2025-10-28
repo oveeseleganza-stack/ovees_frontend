@@ -193,11 +193,11 @@ const Header = ({ cartCount, addToCart, setSelectedProduct, onCartIconClick }) =
     }`}>
       <div className="bg-yellow-400 text-gray-800 py-2 px-4 text-center text-xs sm:text-sm font-semibold">
         <div className="flex items-center justify-center gap-4 flex-wrap">
-          <span>🚚 Home Delivery </span>
+          <span>Home Delivery </span>
           <span>|</span>
-          <span>📍 Track your order</span>
+          <span>Contact us</span>
           <span>|</span>
-          <span>🛍️ All Offers</span>
+          <span>About Us</span>
         </div>
       </div>
 
@@ -277,8 +277,8 @@ const Header = ({ cartCount, addToCart, setSelectedProduct, onCartIconClick }) =
             )}
           </button>
           {/* Order History Button */}
-          {/* <button
-            onClick={() => setOrderHistoryOpen(true)}
+          <button
+            onClick={() => navigate('/orders')}
             className="relative flex items-center gap-2 px-3 py-2 rounded-full hover:bg-gray-700 transition"
           >
             <BookOpen className="w-6 h-6 text-white" />
@@ -289,7 +289,7 @@ const Header = ({ cartCount, addToCart, setSelectedProduct, onCartIconClick }) =
             className="sm:hidden p-2 rounded-full hover:bg-gray-700 transition"
           >
             {isMenuOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
-          </button> */}
+          </button>
         </div>
 
         {/* Mobile Search Close Button */}
