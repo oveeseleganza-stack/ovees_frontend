@@ -50,6 +50,12 @@ const ProductDetailPage = ({ addToCart, cartItems = [] }) => {
   
   
   const handleAdd = (prod, qty) => {
+    // Only show snackbar if qty > 0 (adding items, not removing)
+    if (qty <= 0) {
+      addToCart(prod, qty)
+      return
+    }
+
     // Check if quantity would exceed stock
     const cartItem = cartItems.find(item => item.id === prod.id)
     const currentQty = cartItem ? cartItem.quantity : 0
