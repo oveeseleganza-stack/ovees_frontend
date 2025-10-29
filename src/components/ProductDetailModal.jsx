@@ -279,7 +279,7 @@ const ProductDetailModal = ({ product, onClose, onAddToCart, cartItems = [] }) =
                   ) : (
                     <>
                       <ShoppingCart className="w-5 h-5" />
-                      {product.stock_quantity > 0 ? `Add to Cart (${quantity})` : 'Out of Stock'}
+                      {product.stock_quantity > 0 ? `Add to Cart ` : 'Out of Stock'}
                     </>
                   )}
                 </button>
