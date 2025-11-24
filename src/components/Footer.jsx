@@ -70,7 +70,20 @@ const Footer = () => {
             </ul>
           </div>
 
-         
+          <div>
+            <h4 className="font-semibold text-white mb-4">Download App</h4>
+            <div className="space-y-3">
+              <div className="bg-black rounded-lg px-4 py-2 cursor-pointer hover:bg-gray-800 transition">
+                <p className="text-xs">Download on the</p>
+                <p className="font-semibold">App Store</p>
+              </div>
+              <div className="bg-black rounded-lg px-4 py-2 cursor-pointer hover:bg-gray-800 transition">
+                <p className="text-xs">GET IT ON</p>
+                <p className="font-semibold">Google Play</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div className="border-t border-gray-800 pt-6 text-center text-xs sm:text-sm">
           <p> 2025 All rights reserved, Ovees Eleganza</p>
