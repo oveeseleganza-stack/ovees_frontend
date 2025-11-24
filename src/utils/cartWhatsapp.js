@@ -51,7 +51,7 @@ export function sendCartOrderViaWhatsapp(cartItems, subtotal, discount, delivery
   message += `━━━━━━━━━━━━━━━━━━━━━━━━━━`;
 
   const encodedMessage = encodeURIComponent(message);
-  const whatsappUrl = `https://wa.me/9195?text=${encodedMessage}`;
+  const whatsappUrl = `https://wa.me/919562654307?text=${encodedMessage}`;
   window.open(whatsappUrl, '_blank');
 }
 
