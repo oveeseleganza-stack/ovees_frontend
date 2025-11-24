@@ -27,69 +27,69 @@ const Home = ({ addToCart, cartItems = [] }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarProduct, setSnackbarProduct] = useState(null)
 
-  // Fetch 99 Store Products
-  useEffect(() => {
-    const loadNinetynineStore = async () => {
-      try {
-        const response = await fetchNinetynineStore(1, 100)
-        const data = response.items || []
-        setNinetynineProducts(data)
-        console.log(`Loaded ${data.length} products from 99 Store`)
-      } catch (err) {
-        console.error('Error fetching 99 Store:', err)
-        setError('Failed to load 99 Store. Please try again.')
-      }
-    }
-    loadNinetynineStore()
-  }, [])
+  // // Fetch 99 Store Products
+  // useEffect(() => {
+  //   const loadNinetynineStore = async () => {
+  //     try {
+  //       const response = await fetchNinetynineStore(1, 100)
+  //       const data = response.items || []
+  //       setNinetynineProducts(data)
+  //       console.log(`Loaded ${data.length} products from 99 Store`)
+  //     } catch (err) {
+  //       console.error('Error fetching 99 Store:', err)
+  //       setError('Failed to load 99 Store. Please try again.')
+  //     }
+  //   }
+  //   loadNinetynineStore()
+  // }, [])
 
   // Fetch 199 Store Products
-  useEffect(() => {
-    const loadOneNinetyNineStore = async () => {
-      try {
-        const response = await fetchOneNinetyNineStore(1, 20)
-        const data = response.items || []
-        setOneNinetyNineProducts(data)
-        console.log(`Loaded ${data.length} products from 199 Store`)
-      } catch (err) {
-        console.error('Error fetching 199 Store:', err)
-        setError('Failed to load 199 Store. Please try again.')
-      }
-    }
-    loadOneNinetyNineStore()
-  }, [])
+  // useEffect(() => {
+  //   const loadOneNinetyNineStore = async () => {
+  //     try {
+  //       const response = await fetchOneNinetyNineStore(1, 20)
+  //       const data = response.items || []
+  //       setOneNinetyNineProducts(data)
+  //       console.log(`Loaded ${data.length} products from 199 Store`)
+  //     } catch (err) {
+  //       console.error('Error fetching 199 Store:', err)
+  //       setError('Failed to load 199 Store. Please try again.')
+  //     }
+  //   }
+  //   loadOneNinetyNineStore()
+  // }, [])
 
   // Fetch Combos
-  useEffect(() => {
-    const loadCombos = async () => {
-      try {
-        const response = await fetchCombos(1, 20, true)
-        const data = response.items || []
-        setCombos(data)
-        console.log(`Loaded ${data.length} combos`)
-      } catch (err) {
-        console.error('Error fetching combos:', err)
-        setError('Failed to load Combos. Please try again.')
-      }
-    }
-    loadCombos()
-  }, [])
+  // useEffect(() => {
+  //   const loadCombos = async () => {
+  //     try {
+  //       const response = await fetchCombos(1, 20, true)
+  //       const data = response.items || []
+  //       setCombos(data)
+  //       console.log(`Loaded ${data.length} combos`)
+  //     } catch (err) {
+  //       console.error('Error fetching combos:', err)
+  //       setError('Failed to load Combos. Please try again.')
+  //     }
+  //   }
+  //   loadCombos()
+  // }, [])
 
   // Fetch New Arrivals
-  useEffect(() => {
-    const loadNewArrivals = async () => {
-      try {
-        const response = await fetchNewArrivals(1, 20, true)
-        const data = response.items || []
-        setNewArrivals(data)
-        console.log(`Loaded ${data.length} new arrivals`)
-      } catch (err) {
-        console.error('Error fetching new arrivals:', err)
-        setError('Failed to load New Arrivals. Please try again.')
-      }
-    }
-    loadNewArrivals()
-  }, [])
+  // useEffect(() => {
+  //   const loadNewArrivals = async () => {
+  //     try {
+  //       const response = await fetchNewArrivals(1, 20, true)
+  //       const data = response.items || []
+  //       setNewArrivals(data)
+  //       console.log(`Loaded ${data.length} new arrivals`)
+  //     } catch (err) {
+  //       console.error('Error fetching new arrivals:', err)
+  //       setError('Failed to load New Arrivals. Please try again.')
+  //     }
+  //   }
+  //   loadNewArrivals()
+  // }, [])
 
   // Lazy load all products
   const loadProducts = React.useCallback(async () => {
